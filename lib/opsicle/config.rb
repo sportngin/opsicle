@@ -1,4 +1,5 @@
 require 'yaml'
+require 'rugged'
 
 module Opsicle
   class Config
@@ -14,8 +15,25 @@ module Opsicle
       @aws_config = { access_key_id: fog_confg[:aws_access_key_id], secret_access_key: fog_confg[:aws_secret_access_key] }
     end
 
+    def local_or_git_root(file)
+      # Check in current dir
+      if File.exist?(file)
+        return file
+      else
+        # Check in repo root
+        $stderr.puts "#{file} not found, checking in git repo root"
+        begin
+          path = Rugged::Repository.discover('.')
+          repo = Rugged::Repository.new(path)
+          return File.join(repo.workdir, file)
+        rescue => error
+          fail "#{file} not found (Error checking git repo: #{error.message})"
+        end
+      end
+    end
+
     def opsworks_config
-      @opsworks_config ||= load_config('./.opsicle')
+      @opsworks_config ||= load_config(local_or_git_root('.opsicle'))
     end
 
     def configure_aws!
