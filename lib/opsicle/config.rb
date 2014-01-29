@@ -23,6 +23,7 @@ module Opsicle
     end
 
     def load_config(file)
+      fail "#{file} not found" unless File.exist?(file)
       symbolize_keys(YAML.load_file(file))[environment] rescue {}
     end
 
