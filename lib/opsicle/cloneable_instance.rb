@@ -45,7 +45,7 @@ module Opsicle
       if old_hostname =~ /\d\d\z/
         new_instance_hostname = increment_hostname(old_hostname, all_sibling_hostnames)
       else
-        new_instance_hostname = old_hostname << "_clone"
+        new_instance_hostname = old_hostname << "-clone"
       end
         
       puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
