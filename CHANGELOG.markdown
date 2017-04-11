@@ -1,3 +1,16 @@
+#### v2.4.0
+* Generate valid hostnames when source hostname doesn't end with digits
+
+  > mykola42: : https://github.com/sportngin/opsicle/pull/118
+
+* make aws profile optional (support cross account assume role)
+
+  > troyready: : https://github.com/sportngin/opsicle/pull/119
+ 
+* require minitar ~> 0.6
+
+  > troyready: : https://github.com/sportngin/opsicle/pull/120
+  
 #### v2.3.1
 * Ruby Compatibility
 
