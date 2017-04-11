@@ -1,4 +1,5 @@
 #### v2.4.0
+#### v2.4.0
 * Generate valid hostnames when source hostname doesn't end with digits
 
   > mykola42: : https://github.com/sportngin/opsicle/pull/118
