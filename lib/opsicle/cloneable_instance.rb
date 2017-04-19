@@ -132,6 +132,7 @@ module Opsicle
         agent_version: agent_version,
         tenancy: self.tenancy,
       })
+      self.layer.add_new_instance(new_instance.instance_id)
       puts "\nNew instance has been created: #{new_instance.instance_id}"
     end
   end
