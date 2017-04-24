@@ -20,6 +20,7 @@ module Opsicle
       allow(@layer).to receive(:ami_id)
       allow(@layer).to receive(:agent_version=)
       allow(@layer).to receive(:agent_version)
+      allow(@layer).to receive(:add_new_instance)
       @new_instance = double('new_instance', :instance_id => 1029384756)
       @opsworks = double('opsworks', :create_instance => @new_instance)
       @cli = double('cli', :ask => 2)
@@ -39,8 +40,10 @@ module Opsicle
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         instance1 = double('instance', :hostname => 'example-hostname-01')
         instance2 = double('instance', :hostname => 'example-hostname-02')
-        expect(@layer).to receive(:instances).and_return([instance1, instance2])
-        instance.make_new_hostname('example-hostname-01')
+        instance3 = double('instance', :hostname => 'example-hostname-03')
+        instance4 = double('instance', :hostname => 'example-hostname-04')
+        expect(@layer).to receive(:instances).and_return([instance1, instance2, instance3, instance4])
+        expect(instance.make_new_hostname('example-hostname-01')).to eq('example-hostname-05')
       end
     end
 

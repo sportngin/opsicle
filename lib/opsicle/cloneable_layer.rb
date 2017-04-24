@@ -17,5 +17,10 @@ module Opsicle
       end
       self.instances
     end
+
+    def add_new_instance(instance_id)
+      instance = @opsworks.describe_instances({ :instance_ids => [instance_id] }).instances.first
+      self.instances << CloneableInstance.new(instance, self, @opsworks, @cli)
+    end
   end
 end
