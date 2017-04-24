@@ -1,3 +1,8 @@
+#### v2.4.1
+* Make each generated hostname unique when counting up
+
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/121
+
 #### v2.4.0
 #### v2.4.0
 * Generate valid hostnames when source hostname doesn't end with digits
