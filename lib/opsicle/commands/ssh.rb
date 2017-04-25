@@ -42,6 +42,18 @@ module Opsicle
       @user_profile.ssh_username
     end
 
+    def bastion_ip(instance)
+      if client.config.opsworks_config[:bastion_layer_id]
+        online_bastions = client.api_call(:describe_instances, { layer_id: client.config.opsworks_config[:bastion_layer_id] })[:instances]
+                           .select { |instance| instance[:status].to_s == 'online'}
+        bastion_ip = online_bastions[:public_ip].sample
+        Output.say "Connecting via bastion with IP #{bastion_ip}"
+        bastion_ip
+      elsif client.config.opsworks_config[:bastion_hostname]
+        client.config.opsworks_config[:bastion_hostname]
+      end
+    end
+
     def ssh_ip(instance)
       if client.config.opsworks_config[:internal_ssh_only]
         Output.say "This stack requires a private connection, only using internal IPs."
