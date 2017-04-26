@@ -1,3 +1,8 @@
+#### v2.5.0
+* Add bastion host option to opsicle config
+
+  > Tim Sandquist: Unknown User, Andy Fleener: https://github.com/sportngin/opsicle/pull/122
+
 #### v2.4.1
 * Make each generated hostname unique when counting up
 
