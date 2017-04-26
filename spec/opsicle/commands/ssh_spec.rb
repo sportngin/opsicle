@@ -120,6 +120,30 @@ module Opsicle
       end
     end
 
+    context "#bastion_ip" do
+      let(:instance) { { hostname: "host1", elastic_ip: "123.123.123.123", public_ip: "123.345.567.789", private_ip: "10.10.10.10" } }
+      context "when bastion_layer_id is enabled" do
+        let(:client) { double(config: double(opsworks_config: {stack_id: "1234", bastion_layer_id: "4321"})) }
+        it "returns a Bastion IP" do
+          expect(client).to receive(:api_call).with(:describe_instances, {layer_id: "4321"})
+            .and_return(instances: [{:hostname => "taco", :status => "stopped", :public_ip => "123.123.123.123"},{:hostname => "bar", :status => "online", :public_ip => "213.213.213.213"}])
+          expect(Output).to receive(:say).with("Connecting via bastion with IP 213.213.213.213")
+          expect(subject.bastion_ip).to eq("213.213.213.213")
+        end
+      end
+      context "when bastion_hostname is enabled" do
+        let(:client) { double(config: double(opsworks_config: {stack_id: "1234", bastion_hostname: "sebastion"})) }
+        it "returns the hostname of the bastion host" do
+          expect(subject.bastion_ip).to eq("sebastion")
+        end
+      end
+      context "when bastion is not used" do
+        it "returns false" do
+          expect(subject.bastion_ip).to eq(false)
+        end
+      end
+    end
+
     context "#ssh_ip" do
       let(:instance) { { hostname: "host1", elastic_ip: "123.123.123.123", public_ip: "123.345.567.789", private_ip: "10.10.10.10" } }
       context "when internal_ssh_only is enabled" do
@@ -165,11 +189,41 @@ module Opsicle
       it "creates the proper ssh_command for an instance with a private ip" do
         expect(subject.ssh_command({private_ip: "789.789.789.789" })).to eq("ssh -A -t mrderpyman2014@123.123.123.123 ssh 789.789.789.789")
       end
-      it "properly adds ssh options to the ssh_command for an isntance with a public ip" do
+      it "properly adds ssh options to the ssh_command for an instance with a public ip" do
         expect(subject.ssh_command({elastic_ip: "123.123.123.123" }, { :"ssh-opts" => "-c"})).to eq("ssh -c mrderpyman2014@123.123.123.123")
       end
-      it "properly adds ssh options to the ssh_command for an isntance with a private ip" do
+      it "properly adds ssh options to the ssh_command for an instance with a private ip" do
         expect(subject.ssh_command({private_ip: "789.789.789.789"}, { :"ssh-opts" => "-c"} )).to eq("ssh -c -A -t mrderpyman2014@123.123.123.123 ssh 789.789.789.789")
+      end
+      context "when bastion_layer_id is enabled" do
+        let(:client) { double(config: double(opsworks_config: {stack_id: "1234", bastion_layer_id: "4321"})) }
+        it "creates the proper ssh_command for an instance with a private ip" do
+          expect(client).to receive(:api_call).with(:describe_instances, {layer_id: "4321"})
+            .and_return(instances: [
+                        {:hostname => "taco", :status => "stopped", :public_ip => "123.123.123.123"},
+                        {:hostname => "bar", :status => "online", :public_ip => "213.213.213.213"}
+            ])
+          expect(subject.ssh_command({private_ip: "789.789.789.789" })).to eq("ssh -A -t mrderpyman2014@213.213.213.213 ssh 789.789.789.789")
+        end
+        it "properly adds ssh options to the ssh_command for an instance with a private ip" do
+          expect(client).to receive(:api_call).with(:describe_instances, {layer_id: "4321"})
+            .and_return(instances: [
+                        {:hostname => "taco", :status => "stopped", :public_ip => "123.123.123.123"},
+                        {:hostname => "bar", :status => "online", :public_ip => "213.213.213.213"}
+            ])
+          expect(subject.ssh_command({private_ip: "789.789.789.789"}, { :"ssh-opts" => "-c"} )).to eq("ssh -c -A -t mrderpyman2014@213.213.213.213 ssh 789.789.789.789")
+        end
+      end
+      context "when bastion_hostname is enabled" do
+        let(:client) { double(config: double(opsworks_config: {stack_id: "1234", bastion_hostname: "sebastion"})) }
+        it "creates the proper ssh_command for an instance with a private ip" do
+          expect(Output).to receive(:say).with("Connecting via bastion with hostname 'sebastion'")
+          expect(subject.ssh_command({private_ip: "789.789.789.789" })).to eq("ssh -A -t mrderpyman2014@sebastion ssh 789.789.789.789")
+        end
+        it "properly adds ssh options to the ssh_command for an instance with a private ip" do
+          expect(Output).to receive(:say).with("Connecting via bastion with hostname 'sebastion'")
+          expect(subject.ssh_command({private_ip: "789.789.789.789"}, { :"ssh-opts" => "-c"} )).to eq("ssh -c -A -t mrderpyman2014@sebastion ssh 789.789.789.789")
+        end
       end
     end
 
