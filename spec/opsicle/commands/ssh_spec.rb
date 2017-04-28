@@ -138,8 +138,34 @@ module Opsicle
         end
       end
       context "when bastion is not used" do
+        it "returns nil" do
+          allow(client).to receive(:api_call).with(:describe_instances, {stack_id: "1234"})
+            .and_return(instances: [{:hostname => "taco", :status => "online"},{:hostname => "bar", :status => "online"}])
+          expect(subject.bastion_ip).to eq(nil)
+        end
+      end
+    end
+
+    context "#use_bastion" do
+      context "when bastion config option is disabled and some instances have public IPs" do
         it "returns false" do
-          expect(subject.bastion_ip).to eq(false)
+          allow(subject).to receive(:instances) {[
+                      { hostname: "host1", elastic_ip: "123.123.123.123", public_ip: "123.345.567.789"},
+                      { hostname: "host2", public_ip: "456.456.456.456" },
+                      { hostname: "host2", private_ip: "789.789.789.789" },
+                    ]}
+          expect(subject.use_bastion?).to eq(false)
+        end
+      end
+      context "when bastion config option is enabled and some instances have public IPs" do
+        let(:client) { double(config: double(opsworks_config: {stack_id: "1234", bastion_layer_id: "4321"})) }
+        it "returns false" do
+          allow(subject).to receive(:instances) {[
+                      { hostname: "host1", elastic_ip: "123.123.123.123", public_ip: "123.345.567.789"},
+                      { hostname: "host2", public_ip: "456.456.456.456" },
+                      { hostname: "host2", private_ip: "789.789.789.789" },
+                    ]}
+          expect(subject.use_bastion?).to eq(true)
         end
       end
     end
@@ -197,15 +223,16 @@ module Opsicle
       end
       context "when bastion_layer_id is enabled" do
         let(:client) { double(config: double(opsworks_config: {stack_id: "1234", bastion_layer_id: "4321"})) }
-        it "creates the proper ssh_command for an instance with a private ip" do
-          expect(client).to receive(:api_call).with(:describe_instances, {layer_id: "4321"})
+        it "creates the proper ssh_commands" do
+          allow(client).to receive(:api_call).with(:describe_instances, {layer_id: "4321"})
             .and_return(instances: [
                         {:hostname => "taco", :status => "stopped", :public_ip => "123.123.123.123"},
                         {:hostname => "bar", :status => "online", :public_ip => "213.213.213.213"}
             ])
+          expect(subject.ssh_command({private_ip: "789.789.789.789" } )).to eq("ssh -A -t mrderpyman2014@213.213.213.213 ssh 789.789.789.789")
           expect(subject.ssh_command({private_ip: "789.789.789.789" })).to eq("ssh -A -t mrderpyman2014@213.213.213.213 ssh 789.789.789.789")
         end
-        it "properly adds ssh options to the ssh_command for an instance with a private ip" do
+        it "properly adds ssh options to the ssh_commands" do
           expect(client).to receive(:api_call).with(:describe_instances, {layer_id: "4321"})
             .and_return(instances: [
                         {:hostname => "taco", :status => "stopped", :public_ip => "123.123.123.123"},
