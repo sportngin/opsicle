@@ -19,6 +19,9 @@ module Opsicle
       self.availability_zone = instance.availability_zone
       self.virtualization_type = instance.virtualization_type
       self.subnet_id = instance.subnet_id
+
+      puts "subnet_id: #{self.subnet_id}"
+
       self.architecture = instance.architecture
       self.root_device_type = instance.root_device_type
       self.install_updates_on_boot = instance.install_updates_on_boot
@@ -34,9 +37,10 @@ module Opsicle
       new_instance_hostname = make_new_hostname(self.hostname)
       ami_id = verify_ami_id
       agent_version = verify_agent_version
+      subnet_id = verify_subnet_id
       instance_type = verify_instance_type
 
-      create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version)
+      create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
     end
 
     def make_new_hostname(old_hostname)
@@ -85,24 +89,14 @@ module Opsicle
       else
         puts "\nCurrent agent version is #{self.agent_version}"
         rewriting = @cli.ask("Do you wish to override this version? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer)
-        agent_version = rewriting == 1 ? get_new_agent_version : self.agent_version
+
+        agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
+        version_ids = agents.collect { |a| a.version }
+        agent_version = rewriting == 1 ? get_new_options(version_ids, "agent version ID") : self.agent_version
       end
 
       self.layer.agent_version = agent_version
       agent_version
-    end
-
-    def get_new_agent_version
-      agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
-
-      version_ids = []
-      agents.each do |agent|
-        version_ids << agent.version
-      end
-
-      version_ids.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
-      id_index = @cli.ask("Which agent version ID?\n", Integer) { |q| q.in = 1..version_ids.length.to_i } - 1
-      version_ids[id_index]
     end
 
     def verify_instance_type
@@ -112,7 +106,29 @@ module Opsicle
       instance_type
     end
 
-    def create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version)
+    def verify_subnet_id
+      if self.layer.subnet_id
+        subnet_id = self.layer.subnet_id
+      else
+        puts "\nCurrent subnet id is #{self.subnet_id}"
+        rewriting = @cli.ask("Do you wish to override this id? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer)
+
+        instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
+        subnet_ids = instances.collect { |i| i.subnet_id }
+        subnet_id = rewriting == 1 ? get_new_options(subnet_ids, "subnet ID") : self.subnet_id
+      end
+
+      self.layer.subnet_id = subnet_id
+      subnet_id
+    end
+
+    def get_new_options(arr, option)
+      arr.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
+      id_index = @cli.ask("Which #{option}?\n", Integer) { |q| q.in = 1..arr.length.to_i } - 1
+      arr[id_index]
+    end
+
+    def create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
       new_instance = @opsworks.create_instance({
         stack_id: self.stack_id, # required
         layer_ids: self.layer_ids, # required
@@ -124,7 +140,7 @@ module Opsicle
         ssh_key_name: self.ssh_key_name,
         availability_zone: self.availability_zone,
         virtualization_type: self.virtualization_type,
-        subnet_id: self.subnet_id,
+        subnet_id: subnet_id,
         architecture: self.architecture, # accepts x86_64, i386
         root_device_type: self.root_device_type, # accepts ebs, instance-store
         install_updates_on_boot: self.install_updates_on_boot,
