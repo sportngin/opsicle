@@ -47,12 +47,13 @@ module Opsicle
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to rewrite this hostname?\n1) Yes\n2) No", Integer).and_return(2)
       allow_any_instance_of(HighLine).to receive(:ask).with("Please write in the new instance's hostname and press ENTER:").and_return('example-hostname')
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this AMI? By overriding, you are choosing to override the current AMI for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(2)
-      allow_any_instance_of(HighLine).to receive(:ask).with("Please write in the new AMI id press ENTER:").and_return('example-ami')
+      allow_any_instance_of(HighLine).to receive(:ask).with("Which AMI ID?\n", Integer).and_return(1)
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this version? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(2)
       allow_any_instance_of(HighLine).to receive(:ask).with("Which agent version ID?\n", Integer).and_return(1)
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this instance type?\n1) Yes\n2) No", Integer).and_return(2)
       allow_any_instance_of(HighLine).to receive(:ask).with("Please write in the new instance type press ENTER:").and_return('t2.micro')
-      allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this id? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(2)
+      allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this id? By overriding, you are choosing to override the current subnet id for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(2)
+      allow_any_instance_of(HighLine).to receive(:ask).with("Which subnet ID?\n", Integer).and_return(1)
     end
     
     context "#execute" do
