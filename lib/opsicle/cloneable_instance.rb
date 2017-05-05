@@ -102,7 +102,7 @@ module Opsicle
         if rewriting == 1
           agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
           version_ids = agents.collect { |i| i.version }.uniq
-          agent_version = ask_for_possible_options(version_ids, "agent version ID")
+          agent_version = ask_for_possible_options(version_ids, "agent version")
         else
           agent_version = self.agent_version
         end
