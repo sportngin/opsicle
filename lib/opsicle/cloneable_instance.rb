@@ -81,7 +81,7 @@ module Opsicle
           ami_id = get_new_options(ami_ids, "AMI ID")
 
           if ami_id == "Provide a different AMI ID."
-            ami_id = @cli.ask("Please write in the new AMI ID press ENTER:")
+            ami_id = ask_for_new_option('AMI ID')
           end
         else
           ami_id = self.ami_id
@@ -126,7 +126,7 @@ module Opsicle
           subnet_id = get_new_options(subnet_ids, "subnet ID")
 
           if subnet_id == "Provide a different subnet ID."
-            subnet_id = @cli.ask("Please write in the new subnet ID press ENTER:")
+            subnet_id = ask_for_new_option('subnet ID')
           end
         else
           subnet_id = self.subnet_id
@@ -140,14 +140,18 @@ module Opsicle
     def verify_instance_type
       puts "\nCurrent instance type is #{self.instance_type}"
       rewriting = @cli.ask("Do you wish to override this instance type?\n1) Yes\n2) No", Integer)
-      instance_type = rewriting == 1 ? @cli.ask("Please write in the new instance type press ENTER:") : self.instance_type
+      instance_type = rewriting == 1 ? ask_for_new_option('instance type') : self.instance_type
       instance_type
     end
 
-    def get_new_options(arr, option)
+    def get_new_options(arr, description)
       arr.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
-      id_index = @cli.ask("Which #{option}?\n", Integer) { |q| q.in = 1..arr.length.to_i } - 1
+      id_index = @cli.ask("Which #{description}?\n", Integer) { |q| q.in = 1..arr.length.to_i } - 1
       arr[id_index]
+    end
+
+    def ask_for_new_option(description)
+      @cli.ask("Please write in the new #{description} press ENTER:")
     end
 
     def create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
