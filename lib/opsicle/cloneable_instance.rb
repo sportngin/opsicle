@@ -74,10 +74,15 @@ module Opsicle
         puts "\nCurrent AMI id is #{self.ami_id}"
         rewriting = @cli.ask("Do you wish to override this AMI? By overriding, you are choosing to override the current AMI for all instances you are cloning.\n1) Yes\n2) No", Integer)
       
-        if rewriting
+        if rewriting == 1
           instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
-          ami_ids = instances.collect { |i| i.ami_id }
+          ami_ids = instances.collect { |i| i.ami_id }.uniq
+          ami_ids << "Provide a different AMI ID."
           ami_id = get_new_options(ami_ids, "AMI ID")
+
+          if ami_id == "Provide a different AMI ID."
+            ami_id = @cli.ask("Please write in the new AMI ID press ENTER:")
+          end
         else
           ami_id = self.ami_id
         end
@@ -94,9 +99,9 @@ module Opsicle
         puts "\nCurrent agent version is #{self.agent_version}"
         rewriting = @cli.ask("Do you wish to override this version? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer)
 
-        if rewriting
+        if rewriting == 1
           agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
-          version_ids = agents.collect { |i| i.version }
+          version_ids = agents.collect { |i| i.version }.uniq
           agent_version = get_new_options(version_ids, "agent version ID")
         else
           agent_version = self.agent_version
@@ -114,10 +119,15 @@ module Opsicle
         puts "\nCurrent subnet id is #{self.subnet_id}"
         rewriting = @cli.ask("Do you wish to override this id? By overriding, you are choosing to override the current subnet id for all instances you are cloning.\n1) Yes\n2) No", Integer)
 
-        if rewriting
+        if rewriting == 1
           instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
-          subnet_ids = instances.collect { |i| i.subnet_id }
+          subnet_ids = instances.collect { |i| i.subnet_id }.uniq
+          subnet_ids << "Provide a different subnet ID."
           subnet_id = get_new_options(subnet_ids, "subnet ID")
+
+          if subnet_id == "Provide a different subnet ID."
+            subnet_id = @cli.ask("Please write in the new subnet ID press ENTER:")
+          end
         else
           subnet_id = self.subnet_id
         end
