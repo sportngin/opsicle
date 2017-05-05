@@ -21,8 +21,17 @@ module Opsicle
       allow(@layer).to receive(:agent_version=)
       allow(@layer).to receive(:agent_version)
       allow(@layer).to receive(:add_new_instance)
+      allow(@layer).to receive(:subnet_id=)
+      allow(@layer).to receive(:subnet_id)
       @new_instance = double('new_instance', :instance_id => 1029384756)
       @opsworks = double('opsworks', :create_instance => @new_instance)
+      @agent_version_1 = double('agent_version', :version => '3434-20160316181345')
+      @agent_version_2 = double('agent_version', :version => '3435-20160406115841')
+      @agent_version_3 = double('agent_version', :version => '3436-20160418214624')
+      @agent_versions = double('agent_versions', :agent_versions => [@agent_version_1, @agent_version_2, @agent_version_3])
+      allow(@opsworks).to receive(:describe_agent_versions).with({:stack_id=>1234567890}).and_return(@agent_versions)
+      @instances = double('instances', :instances => [@instance])
+      allow(@opsworks).to receive(:describe_instances).with({:stack_id=>1234567890}).and_return(@instances)
       @cli = double('cli', :ask => 2)
     end
 
@@ -51,6 +60,7 @@ module Opsicle
       it "should increment the hostname" do
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         expect(instance).to receive(:hostname_unique?).and_return('example-hostname-03')
+        allow(@opsworks).to receive(:describe_agent_version).with({})
         instance.increment_hostname('example-hostname-01', ['example-hostname-01', 'example-hostname-02'])
       end
     end
@@ -67,6 +77,7 @@ module Opsicle
         expect(instance).to receive(:verify_ami_id)
         expect(instance).to receive(:verify_agent_version)
         expect(instance).to receive(:verify_instance_type)
+        expect(instance).to receive(:verify_subnet_id)
         instance.clone({})
       end
 
@@ -83,7 +94,7 @@ module Opsicle
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         allow(@layer).to receive(:agent_version).and_return(nil)
         allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this version? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(1)
-        expect(instance).to receive(:get_new_agent_version)
+        expect(instance).to receive(:get_new_options)
         instance.verify_agent_version
       end
 
@@ -91,6 +102,23 @@ module Opsicle
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         expect(@layer).to receive(:agent_version)
         instance.verify_agent_version
+      end
+    end
+
+    context '#verify_subnet_id' do
+      it "should check the subnet id and ask if the user wants a new subnet id" do
+        @cli = double('cli', :ask => 1)
+        instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
+        allow(@layer).to receive(:subnet_id).and_return(nil)
+        allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this id? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(1)
+        expect(instance).to receive(:get_new_options)
+        instance.verify_subnet_id
+      end
+
+      it "should see if the layer already has overwritten the subnet id" do
+        instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
+        expect(@layer).to receive(:subnet_id)
+        instance.verify_subnet_id
       end
     end
 
@@ -126,7 +154,7 @@ module Opsicle
       it "should create an instance" do
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         expect(@opsworks).to receive(:create_instance)
-        instance.create_new_instance('hostname', 'type', 'ami', 'agent_version')
+        instance.create_new_instance('hostname', 'type', 'ami', 'agent_version', 'subnet_id')
       end
 
       it "should take information from old instance" do
@@ -138,8 +166,7 @@ module Opsicle
         expect(instance).to receive(:ssh_key_name)
         expect(instance).to receive(:availability_zone)
         expect(instance).to receive(:virtualization_type)
-        expect(instance).to receive(:subnet_id)
-        instance.create_new_instance('hostname', 'type', 'ami', 'agent_version')
+        instance.create_new_instance('hostname', 'type', 'ami', 'agent_version', 'subnet_id')
       end
     end
   end
