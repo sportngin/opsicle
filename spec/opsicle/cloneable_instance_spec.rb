@@ -128,7 +128,8 @@ module Opsicle
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         allow(@layer).to receive(:ami_id).and_return(nil)
         allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this AMI? By overriding, you are choosing to override the current AMI for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(1)
-        expect(@cli).to receive(:ask).twice
+        expect(@cli).to receive(:ask).once
+        expect(instance).to receive(:get_new_options)
         instance.verify_ami_id
       end
 
