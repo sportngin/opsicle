@@ -151,7 +151,7 @@ module Opsicle
     end
 
     def ask_for_new_option(description)
-      @cli.ask("Please write in the new #{description} press ENTER:")
+      @cli.ask("Please write in the new #{description} and press ENTER:")
     end
 
     def ask_for_overriding_permission(description, overriding_all)
