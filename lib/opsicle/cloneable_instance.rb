@@ -50,8 +50,7 @@ module Opsicle
       end
         
       puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
-      rewriting = ask_for_overriding_permission("hostname", false)
-      new_instance_hostname = ask_for_new_option("instance's hostname") if rewriting == 1
+      new_instance_hostname = ask_for_new_option("instance's hostname") if ask_for_overriding_permission("hostname", false)
 
       new_instance_hostname
     end
@@ -72,9 +71,8 @@ module Opsicle
         ami_id = self.layer.ami_id
       else
         puts "\nCurrent AMI id is #{self.ami_id}"
-        rewriting = ask_for_overriding_permission("AMI ID", true)
 
-        if rewriting == 1
+        if ask_for_overriding_permission("AMI ID", true)
           instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
           ami_ids = instances.collect { |i| i.ami_id }.uniq
           ami_ids << "Provide a different AMI ID."
@@ -97,9 +95,8 @@ module Opsicle
         agent_version = self.layer.agent_version
       else
         puts "\nCurrent agent version is #{self.agent_version}"
-        rewriting = ask_for_overriding_permission("agent version", true)
 
-        if rewriting == 1
+        if ask_for_overriding_permission("agent version", true)
           agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
           version_ids = agents.collect { |i| i.version }.uniq
           agent_version = ask_for_possible_options(version_ids, "agent version")
@@ -117,9 +114,8 @@ module Opsicle
         subnet_id = self.layer.subnet_id
       else
         puts "\nCurrent subnet id is #{self.subnet_id}"
-        rewriting = ask_for_overriding_permission("subnet ID", true)
 
-        if rewriting == 1
+        if ask_for_overriding_permission("subnet ID", true)
           instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
           subnet_ids = instances.collect { |i| i.subnet_id }.uniq
           subnet_ids << "Provide a different subnet ID."
@@ -140,7 +136,7 @@ module Opsicle
     def verify_instance_type
       puts "\nCurrent instance type is #{self.instance_type}"
       rewriting = ask_for_overriding_permission("instance type", false)
-      instance_type = rewriting == 1 ? ask_for_new_option('instance type') : self.instance_type
+      instance_type = rewriting ? ask_for_new_option('instance type') : self.instance_type
       instance_type
     end
 
@@ -156,10 +152,11 @@ module Opsicle
 
     def ask_for_overriding_permission(description, overriding_all)
       if overriding_all
-        @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all instances you are cloning.\n1) Yes\n2) No", Integer)
+        ans = @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all instances you are cloning.\n1) Yes\n2) No", Integer)
       else
-        @cli.ask("Do you wish to override this #{description}?\n1) Yes\n2) No", Integer)
+        ans = @cli.ask("Do you wish to override this #{description}?\n1) Yes\n2) No", Integer)
       end
+      ans == 1
     end
 
     def create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
