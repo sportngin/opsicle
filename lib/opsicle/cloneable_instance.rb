@@ -34,9 +34,10 @@ module Opsicle
       new_instance_hostname = make_new_hostname(self.hostname)
       ami_id = verify_ami_id
       agent_version = verify_agent_version
+      subnet_id = verify_subnet_id
       instance_type = verify_instance_type
 
-      create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version)
+      create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
     end
 
     def make_new_hostname(old_hostname)
@@ -49,8 +50,7 @@ module Opsicle
       end
         
       puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
-      rewriting = @cli.ask("Do you wish to rewrite this hostname?\n1) Yes\n2) No", Integer)
-      new_instance_hostname = @cli.ask("Please write in the new instance's hostname and press ENTER:") if rewriting == 1
+      new_instance_hostname = ask_for_new_option("instance's hostname") if ask_for_overriding_permission("hostname", false)
 
       new_instance_hostname
     end
@@ -71,8 +71,19 @@ module Opsicle
         ami_id = self.layer.ami_id
       else
         puts "\nCurrent AMI id is #{self.ami_id}"
-        rewriting = @cli.ask("Do you wish to override this AMI? By overriding, you are choosing to override the current AMI for all instances you are cloning.\n1) Yes\n2) No", Integer)
-        ami_id = rewriting == 1 ? @cli.ask("Please write in the new AMI id press ENTER:") : self.ami_id
+
+        if ask_for_overriding_permission("AMI ID", true)
+          instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
+          ami_ids = instances.collect { |i| i.ami_id }.uniq
+          ami_ids << "Provide a different AMI ID."
+          ami_id = ask_for_possible_options(ami_ids, "AMI ID")
+
+          if ami_id == "Provide a different AMI ID."
+            ami_id = ask_for_new_option('AMI ID')
+          end
+        else
+          ami_id = self.ami_id
+        end
       end
 
       self.layer.ami_id = ami_id
@@ -84,35 +95,71 @@ module Opsicle
         agent_version = self.layer.agent_version
       else
         puts "\nCurrent agent version is #{self.agent_version}"
-        rewriting = @cli.ask("Do you wish to override this version? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer)
-        agent_version = rewriting == 1 ? get_new_agent_version : self.agent_version
+
+        if ask_for_overriding_permission("agent version", true)
+          agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
+          version_ids = agents.collect { |i| i.version }.uniq
+          agent_version = ask_for_possible_options(version_ids, "agent version")
+        else
+          agent_version = self.agent_version
+        end
       end
 
       self.layer.agent_version = agent_version
       agent_version
     end
 
-    def get_new_agent_version
-      agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
+    def verify_subnet_id
+      if self.layer.subnet_id
+        subnet_id = self.layer.subnet_id
+      else
+        puts "\nCurrent subnet id is #{self.subnet_id}"
 
-      version_ids = []
-      agents.each do |agent|
-        version_ids << agent.version
+        if ask_for_overriding_permission("subnet ID", true)
+          instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
+          subnet_ids = instances.collect { |i| i.subnet_id }.uniq
+          subnet_ids << "Provide a different subnet ID."
+          subnet_id = ask_for_possible_options(subnet_ids, "subnet ID")
+
+          if subnet_id == "Provide a different subnet ID."
+            subnet_id = ask_for_new_option('subnet ID')
+          end
+        else
+          subnet_id = self.subnet_id
+        end
       end
 
-      version_ids.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
-      id_index = @cli.ask("Which agent version ID?\n", Integer) { |q| q.in = 1..version_ids.length.to_i } - 1
-      version_ids[id_index]
+      self.layer.subnet_id = subnet_id
+      subnet_id
     end
 
     def verify_instance_type
       puts "\nCurrent instance type is #{self.instance_type}"
-      rewriting = @cli.ask("Do you wish to override this instance type?\n1) Yes\n2) No", Integer)
-      instance_type = rewriting == 1 ? @cli.ask("Please write in the new instance type press ENTER:") : self.instance_type
+      rewriting = ask_for_overriding_permission("instance type", false)
+      instance_type = rewriting ? ask_for_new_option('instance type') : self.instance_type
       instance_type
     end
 
-    def create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version)
+    def ask_for_possible_options(arr, description)
+      arr.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
+      id_index = @cli.ask("Which #{description}?\n", Integer) { |q| q.in = 1..arr.length.to_i } - 1
+      arr[id_index]
+    end
+
+    def ask_for_new_option(description)
+      @cli.ask("Please write in the new #{description} and press ENTER:")
+    end
+
+    def ask_for_overriding_permission(description, overriding_all)
+      if overriding_all
+        ans = @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all instances you are cloning.\n1) Yes\n2) No", Integer)
+      else
+        ans = @cli.ask("Do you wish to override this #{description}?\n1) Yes\n2) No", Integer)
+      end
+      ans == 1
+    end
+
+    def create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
       new_instance = @opsworks.create_instance({
         stack_id: self.stack_id, # required
         layer_ids: self.layer_ids, # required
@@ -124,7 +171,7 @@ module Opsicle
         ssh_key_name: self.ssh_key_name,
         availability_zone: self.availability_zone,
         virtualization_type: self.virtualization_type,
-        subnet_id: self.subnet_id,
+        subnet_id: subnet_id,
         architecture: self.architecture, # accepts x86_64, i386
         root_device_type: self.root_device_type, # accepts ebs, instance-store
         install_updates_on_boot: self.install_updates_on_boot,
