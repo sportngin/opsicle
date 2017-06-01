@@ -1,6 +1,6 @@
 module Opsicle
   class CloneableInstance
-    attr_accessor
+    attr_accessor(
       :hostname,
       :status,
       :layer,
@@ -23,6 +23,7 @@ module Opsicle
       :tenancy,
       :opsworks,
       :cli
+    )
 
     def initialize(instance, layer, opsworks, cli)
       self.hostname = instance.hostname
