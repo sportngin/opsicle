@@ -1,8 +1,28 @@
 module Opsicle
   class CloneableInstance
-    attr_accessor :hostname, :status, :layer, :ami_id, :instance_type, :agent_version, :stack_id, :layer_ids,
-                  :auto_scaling_type, :os, :ssh_key_name, :availability_zone, :virtualization_type, :subnet_id,
-                  :architecture, :root_device_type, :install_updates_on_boot, :ebs_optimized, :tenancy, :opsworks, :cli
+    attr_accessor
+      :hostname,
+      :status,
+      :layer,
+      :ami_id,
+      :instance_type,
+      :new_instance_id,
+      :agent_version,
+      :stack_id,
+      :layer_ids,
+      :auto_scaling_type,
+      :os,
+      :ssh_key_name,
+      :availability_zone,
+      :virtualization_type,
+      :subnet_id,
+      :architecture,
+      :root_device_type,
+      :install_updates_on_boot,
+      :ebs_optimized,
+      :tenancy,
+      :opsworks,
+      :cli
 
     def initialize(instance, layer, opsworks, cli)
       self.hostname = instance.hostname
@@ -26,6 +46,7 @@ module Opsicle
       self.tenancy = instance.tenancy
       self.opsworks = opsworks
       self.cli = cli
+      self.new_instance_id = nil
     end
 
     def clone(options)
@@ -37,8 +58,8 @@ module Opsicle
       subnet_id = verify_subnet_id
       instance_type = verify_instance_type
 
-      new_instance = create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
-      start_new_instance(new_instance.instance_id)
+      create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
+      start_new_instance
     end
 
     def make_new_hostname(old_hostname)
@@ -180,14 +201,14 @@ module Opsicle
         agent_version: agent_version,
         tenancy: self.tenancy,
       })
-      self.layer.add_new_instance(new_instance.instance_id)
-      puts "\nNew instance has been created: #{new_instance.instance_id}"
-      new_instance
+      self.new_instance_id = new_instance.instance_id
+      self.layer.add_new_instance(new_instance_id)
+      puts "\nNew instance has been created: #{new_instance_id}"
     end
 
-    def start_new_instance(instance_id)
+    def start_new_instance
       if ask_to_start_instance
-        @opsworks.start_instance(instance_id: instance_id)
+        @opsworks.start_instance(instance_id: self.new_instance_id)
       end
     end
 

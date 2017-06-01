@@ -24,7 +24,7 @@ module Opsicle
       instances_to_clone.each do |instance|
         instance.clone(options)
       end
-      
+
       layer.ami_id = nil
       layer.agent_version = nil
     end
@@ -49,7 +49,7 @@ module Opsicle
       instance_indices_string = @cli.ask("Instances? (enter as a comma separated list)\n", String)
       instance_indices_list = instance_indices_string.split(/,\s*/)
       instance_indices_list.map! { |instance_index| instance_index.to_i - 1 }
-      
+
       return_array = []
       instance_indices_list.each do |index|
         return_array << instances[index]
