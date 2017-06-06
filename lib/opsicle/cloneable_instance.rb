@@ -1,8 +1,29 @@
 module Opsicle
   class CloneableInstance
-    attr_accessor :hostname, :status, :layer, :ami_id, :instance_type, :agent_version, :stack_id, :layer_ids,
-                  :auto_scaling_type, :os, :ssh_key_name, :availability_zone, :virtualization_type, :subnet_id,
-                  :architecture, :root_device_type, :install_updates_on_boot, :ebs_optimized, :tenancy, :opsworks, :cli
+    attr_accessor(
+      :hostname,
+      :status,
+      :layer,
+      :ami_id,
+      :instance_type,
+      :new_instance_id,
+      :agent_version,
+      :stack_id,
+      :layer_ids,
+      :auto_scaling_type,
+      :os,
+      :ssh_key_name,
+      :availability_zone,
+      :virtualization_type,
+      :subnet_id,
+      :architecture,
+      :root_device_type,
+      :install_updates_on_boot,
+      :ebs_optimized,
+      :tenancy,
+      :opsworks,
+      :cli
+    )
 
     def initialize(instance, layer, opsworks, cli)
       self.hostname = instance.hostname
@@ -26,11 +47,12 @@ module Opsicle
       self.tenancy = instance.tenancy
       self.opsworks = opsworks
       self.cli = cli
+      self.new_instance_id = nil
     end
 
     def clone(options)
       puts "\nCloning an instance..."
-      
+
       new_instance_hostname = make_new_hostname(self.hostname)
       ami_id = verify_ami_id
       agent_version = verify_agent_version
@@ -38,6 +60,7 @@ module Opsicle
       instance_type = verify_instance_type
 
       create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
+      start_new_instance
     end
 
     def make_new_hostname(old_hostname)
@@ -48,7 +71,7 @@ module Opsicle
       else
         new_instance_hostname = old_hostname << "-clone"
       end
-        
+
       puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
       new_instance_hostname = ask_for_new_option("instance's hostname") if ask_for_overriding_permission("hostname", false)
 
@@ -179,8 +202,20 @@ module Opsicle
         agent_version: agent_version,
         tenancy: self.tenancy,
       })
-      self.layer.add_new_instance(new_instance.instance_id)
-      puts "\nNew instance has been created: #{new_instance.instance_id}"
+      self.new_instance_id = new_instance.instance_id
+      self.layer.add_new_instance(new_instance_id)
+      puts "\nNew instance has been created: #{new_instance_id}"
+    end
+
+    def start_new_instance
+      if ask_to_start_instance
+        @opsworks.start_instance(instance_id: self.new_instance_id)
+      end
+    end
+
+    def ask_to_start_instance
+      ans = @cli.ask("Do you wish to start this new instance?\n1) Yes\n2) No", Integer)
+      ans == 1
     end
   end
 end
