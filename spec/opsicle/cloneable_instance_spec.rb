@@ -86,6 +86,13 @@ module Opsicle
         expect(instance).to receive(:create_new_instance)
         instance.clone({})
       end
+
+      it "should start new instance" do
+        instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
+        allow(instance).to receive(:ask_to_start_instance).and_return(true)
+        expect(instance).to receive(:start_new_instance)
+        instance.clone({})
+      end
     end
 
     context '#verify_agent_version' do
