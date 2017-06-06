@@ -32,7 +32,8 @@ module Opsicle
       @stack = double('stack')
       @stacks = double('stacks', :stacks => [@stack])
       @opsworks = double('opsworks', :describe_instances => @instances, :describe_layers => @layers,
-                                     :create_instance => @new_instance, :describe_stacks => @stacks)
+                                     :create_instance => @new_instance, :describe_stacks => @stacks,
+                                     :start_instance => @new_instance)
       @config = double('config', :opsworks_config => {:stack_id => 1234567890})
       @client = double('client', :config => @config, :opsworks => @opsworks)
       allow(Client).to receive(:new).with(:environment).and_return(@client)
@@ -54,8 +55,9 @@ module Opsicle
       allow_any_instance_of(HighLine).to receive(:ask).with("Please write in the new instance type press ENTER:").and_return('t2.micro')
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this subnet ID? By overriding, you are choosing to override the current subnet ID for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(2)
       allow_any_instance_of(HighLine).to receive(:ask).with("Which subnet ID?\n", Integer).and_return(1)
+      allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to start this new instance?\n1) Yes\n2) No", Integer).and_return(1)
     end
-    
+
     context "#execute" do
       it "lists all current layers" do
         expect(@opsworks).to receive(:describe_layers)
