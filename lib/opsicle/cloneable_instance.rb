@@ -101,6 +101,10 @@ module Opsicle
       name
     end
 
+    def sibling_hostnames
+      self.layer.instances.map(&:hostname)
+    end
+
     def hostname_unique?(name)
       !sibling_hostnames.include?(name)
     end
