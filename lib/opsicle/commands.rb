@@ -3,6 +3,7 @@ require 'opsicle/client'
 require "opsicle/commands/deploy"
 require "opsicle/commands/chef_update"
 require "opsicle/commands/clone_instance"
+require "opsicle/commands/replace_instance"
 require "opsicle/commands/execute_recipes"
 require "opsicle/commands/list"
 require "opsicle/commands/list_instances"

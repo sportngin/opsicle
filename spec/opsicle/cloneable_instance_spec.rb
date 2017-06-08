@@ -14,7 +14,7 @@ module Opsicle
                                        :availability_zone => 'availability_zone', :virtualization_type => 'virtualization_type',
                                        :subnet_id => 'subnet_id', :architecture => 'architecture',
                                        :root_device_type => 'root_device_type', :install_updates_on_boot => 'install_updates_on_boot',
-                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy')
+                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id')
       @layer = double('layer1', :name => 'layer-1', :layer_id => 12345, :instances => [@instance], :ami_id => nil, :agent_version => nil)
       allow(@layer).to receive(:ami_id=)
       allow(@layer).to receive(:ami_id)
@@ -38,11 +38,10 @@ module Opsicle
     context "#make_new_hostname" do
       it "should make a unique incremented hostname" do
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
-        expect(instance).to receive(:increment_hostname).and_return('example-hostname-03')
         instance1 = double('instance', :hostname => 'example-hostname-01')
         instance2 = double('instance', :hostname => 'example-hostname-02')
         allow(@layer).to receive(:instances).and_return([instance1, instance2])
-        instance.make_new_hostname('example-hostname-01')
+        expect(instance.make_new_hostname).to eq('example-hostname-03')
       end
 
       it "should make a unique incremented hostname" do
@@ -51,8 +50,8 @@ module Opsicle
         instance2 = double('instance', :hostname => 'example-hostname-02')
         instance3 = double('instance', :hostname => 'example-hostname-03')
         instance4 = double('instance', :hostname => 'example-hostname-04')
-        expect(@layer).to receive(:instances).and_return([instance1, instance2, instance3, instance4])
-        expect(instance.make_new_hostname('example-hostname-01')).to eq('example-hostname-05')
+        allow(@layer).to receive(:instances).and_return([instance1, instance2, instance3, instance4])
+        expect(instance.make_new_hostname).to eq('example-hostname-05')
       end
     end
 
@@ -61,7 +60,7 @@ module Opsicle
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         expect(instance).to receive(:hostname_unique?).and_return('example-hostname-03')
         allow(@opsworks).to receive(:describe_agent_version).with({})
-        instance.increment_hostname('example-hostname-01', ['example-hostname-01', 'example-hostname-02'])
+        expect(instance.increment_hostname).to eq('example-hostname-01')
       end
     end
 

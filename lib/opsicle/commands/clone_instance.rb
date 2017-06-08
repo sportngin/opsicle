@@ -19,14 +19,22 @@ module Opsicle
       puts "Stack ID = #{@stack.id}"
       layer = select_layer
       all_instances = layer.get_cloneable_instances
-      instances_to_clone = select_instances(all_instances)
+      instances = select_instances(all_instances)
+      options[:replace] ? replace(instances, options) : clone(instances, options)
+      clean_layer(layer)
+    end
 
-      instances_to_clone.each do |instance|
-        instance.clone(options)
-      end
-
+    def clean_layer(layer)
       layer.ami_id = nil
       layer.agent_version = nil
+    end
+
+    def clone(instances, options)
+      instances.each { |instance| instance.clone(options) }
+    end
+
+    def replace(instances, options)
+      instances.each { |instance| instance.replace(options) }
     end
 
     def select_layer

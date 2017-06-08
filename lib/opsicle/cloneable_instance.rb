@@ -6,6 +6,7 @@ module Opsicle
       :layer,
       :ami_id,
       :instance_type,
+      :instance_id,
       :new_instance_id,
       :agent_version,
       :stack_id,
@@ -47,13 +48,14 @@ module Opsicle
       self.tenancy = instance.tenancy
       self.opsworks = opsworks
       self.cli = cli
+      self.instance_id = instance.instance_id
       self.new_instance_id = nil
     end
 
     def clone(options)
       puts "\nCloning an instance..."
 
-      new_instance_hostname = make_new_hostname(self.hostname)
+      new_instance_hostname = make_new_hostname
       ami_id = verify_ami_id
       agent_version = verify_agent_version
       subnet_id = verify_subnet_id
@@ -63,30 +65,45 @@ module Opsicle
       start_new_instance
     end
 
-    def make_new_hostname(old_hostname)
-      all_sibling_hostnames = self.layer.instances.collect { |instance| instance.hostname }
 
-      if old_hostname =~ /\d\d\z/
-        new_instance_hostname = increment_hostname(old_hostname, all_sibling_hostnames)
-      else
-        new_instance_hostname = old_hostname << "-clone"
-      end
+    def replace(options)
+      puts "\nCloning an instance..."
+      new_hostname = auto_generated_hostname
+      create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
+      opsworks.start_instance(instance_id: new_instance_id)
+      puts "\nNew instance has been started. #{new_hostname}"
+      stop_old_instance
+    end
 
+    def make_new_hostname
+      new_instance_hostname = auto_generated_hostname
       puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
       new_instance_hostname = ask_for_new_option("instance's hostname") if ask_for_overriding_permission("hostname", false)
-
       new_instance_hostname
     end
 
-    def increment_hostname(hostname, all_sibling_hostnames)
-      until hostname_unique?(hostname, all_sibling_hostnames) do
-        hostname = hostname.gsub(/(\d\d\z)/) { "#{($1.to_i + 1).to_s.rjust(2, '0')}" }
+    def auto_generated_hostname
+      if hostname =~ /\d\d\z/
+        increment_hostname
+      else
+        hostname << "-clone"
       end
-      hostname
     end
 
-    def hostname_unique?(hostname, all_sibling_hostnames)
-      !all_sibling_hostnames.include?(hostname)
+    def sibling_hostnames
+      self.layer.instances.collect { |instance| instance.hostname }
+    end
+
+    def increment_hostname
+      name = hostname
+      until hostname_unique?(name) do
+        name = name.gsub(/(\d\d\z)/) { "#{($1.to_i + 1).to_s.rjust(2, '0')}" }
+      end
+      name
+    end
+
+    def hostname_unique?(name)
+      !sibling_hostnames.include?(name)
     end
 
     def verify_ami_id
@@ -210,11 +227,24 @@ module Opsicle
     def start_new_instance
       if ask_to_start_instance
         @opsworks.start_instance(instance_id: self.new_instance_id)
+        puts "\nNew instance has been started."
       end
     end
 
     def ask_to_start_instance
       ans = @cli.ask("Do you wish to start this new instance?\n1) Yes\n2) No", Integer)
+      ans == 1
+    end
+
+    def stop_old_instance
+      if ask_to_stop_instance
+        @opsworks.stop_instance(instance_id: instance_id)
+        puts "\nOld instance has been stopped."
+      end
+    end
+
+    def ask_to_stop_instance
+      ans = @cli.ask("Do you wish to stop the old instance?\n1) Yes\n2) No", Integer)
       ans == 1
     end
   end
