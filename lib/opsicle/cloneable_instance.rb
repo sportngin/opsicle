@@ -66,13 +66,12 @@ module Opsicle
     end
 
 
-    def replace(options)
+    def clone_with_defaults(options)
       puts "\nCloning an instance..."
       new_hostname = auto_generated_hostname
       create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
       opsworks.start_instance(instance_id: new_instance_id)
-      puts "\nNew instance has been started. #{new_hostname}"
-      stop_old_instance
+      puts "\nNew instance #{new_hostname} has been started."
     end
 
     def make_new_hostname
@@ -221,7 +220,7 @@ module Opsicle
       })
       self.new_instance_id = new_instance.instance_id
       self.layer.add_new_instance(new_instance_id)
-      puts "\nNew instance has been created: #{new_instance_id}"
+      puts "\nNew instance has been created.\nid: #{new_instance_id}"
     end
 
     def start_new_instance
@@ -233,18 +232,6 @@ module Opsicle
 
     def ask_to_start_instance
       ans = @cli.ask("Do you wish to start this new instance?\n1) Yes\n2) No", Integer)
-      ans == 1
-    end
-
-    def stop_old_instance
-      if ask_to_stop_instance
-        @opsworks.stop_instance(instance_id: instance_id)
-        puts "\nOld instance has been stopped."
-      end
-    end
-
-    def ask_to_stop_instance
-      ans = @cli.ask("Do you wish to stop the old instance?\n1) Yes\n2) No", Integer)
       ans == 1
     end
   end

@@ -20,7 +20,11 @@ module Opsicle
       layer = select_layer
       all_instances = layer.get_cloneable_instances
       instances = select_instances(all_instances)
-      options[:replace] ? replace(instances, options) : clone(instances, options)
+      if options[:with_defaults]
+        clone_with_defaults(instances, options)
+      else
+        clone(instances, options)
+      end
       clean_layer(layer)
     end
 
@@ -33,8 +37,8 @@ module Opsicle
       instances.each { |instance| instance.clone(options) }
     end
 
-    def replace(instances, options)
-      instances.each { |instance| instance.replace(options) }
+    def clone_with_defaults(instances, options)
+      instances.each { |instance| instance.clone_with_defaults(options) }
     end
 
     def select_layer
