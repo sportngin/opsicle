@@ -224,13 +224,13 @@ module Opsicle
       })
       self.new_instance_id = new_instance.instance_id
       self.layer.add_new_instance(new_instance_id)
-      puts "\nNew instance has been created.\nid: #{new_instance_id}"
+      puts "\nNew instance has been created: #{new_instance_id}"
     end
 
     def start_new_instance
       if ask_to_start_instance
         @opsworks.start_instance(instance_id: self.new_instance_id)
-        puts "\nNew instance has been started."
+        puts "\nNew instance #{new_hostname} is starting…"
       end
     end
 
