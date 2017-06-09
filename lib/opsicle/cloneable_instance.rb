@@ -71,7 +71,7 @@ module Opsicle
       new_hostname = auto_generated_hostname
       create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
       opsworks.start_instance(instance_id: new_instance_id)
-      puts "\nNew instance #{new_hostname} is starting…"
+      puts "\nNew instance is starting…"
     end
 
     def make_new_hostname
@@ -224,13 +224,13 @@ module Opsicle
       })
       self.new_instance_id = new_instance.instance_id
       self.layer.add_new_instance(new_instance_id)
-      puts "\nNew instance has been created: #{new_instance_id}"
+      puts "\nNew instance #{new_instance_hostname} has been created: #{new_instance_id}"
     end
 
     def start_new_instance
       if ask_to_start_instance
         @opsworks.start_instance(instance_id: self.new_instance_id)
-        puts "\nNew instance #{new_hostname} is starting…"
+        puts "\nNew instance is starting…"
       end
     end
 
