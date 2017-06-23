@@ -196,7 +196,7 @@ end
 desc "Clone instances in the given environment stack"
 arg_name '<environment>'
 command 'clone-instance' do |c|
-  c.switch [:d, :with_defaults], desc: "Clone the instances with no overrides", default_value: false
+  c.switch [:d, :'with-defaults'], desc: "Clone the instances with no overrides", default_value: false
   c.action do |global_options, options, args|
     raise ArgumentError, "Environment is required" unless args.first
     Opsicle::CloneInstance.new(args.first).execute global_options.merge options
