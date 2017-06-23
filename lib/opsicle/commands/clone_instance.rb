@@ -26,7 +26,7 @@ module Opsicle
     end
 
     def clone_instances(instances, options)
-      if options[:with_defaults]
+      if options[:'with-defaults']
         instances.each { |instance| instance.clone_with_defaults(options) }
       else
         instances.each { |instance| instance.clone(options) }
