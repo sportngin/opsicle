@@ -166,6 +166,7 @@ module Opsicle
 
           if subnet_id == "Provide a different subnet ID."
             subnet_id = ask_for_new_option('subnet ID')
+            self.availability_zone = Aws::EC2::Subnet.new(id: subnet_id).availability_zone
           end
         else
           subnet_id = self.subnet_id
