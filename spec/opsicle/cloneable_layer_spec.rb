@@ -14,7 +14,7 @@ module Opsicle
                                        :availability_zone => 'availability_zone', :virtualization_type => 'virtualization_type',
                                        :subnet_id => 'subnet_id', :architecture => 'architecture',
                                        :root_device_type => 'root_device_type', :install_updates_on_boot => 'install_updates_on_boot',
-                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy')
+                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id')
       @instance2 = double('instance2', :hostname => 'example-hostname-02', :status => 'active',
                                        :ami_id => 'ami_id', :instance_type => 'instance_type',
                                        :agent_version => 'agent_version', :stack_id => 1234567890,
@@ -23,7 +23,7 @@ module Opsicle
                                        :availability_zone => 'availability_zone', :virtualization_type => 'virtualization_type',
                                        :subnet_id => 'subnet_id', :architecture => 'architecture',
                                        :root_device_type => 'root_device_type', :install_updates_on_boot => 'install_updates_on_boot',
-                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy')
+                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id')
       @instance3 = double('instance3', :hostname => 'example-hostname-03', :status => 'stopped',
                                        :ami_id => 'ami_id', :instance_type => 'instance_type',
                                        :agent_version => 'agent_version', :stack_id => 1234567890,
@@ -32,7 +32,7 @@ module Opsicle
                                        :availability_zone => 'availability_zone', :virtualization_type => 'virtualization_type',
                                        :subnet_id => 'subnet_id', :architecture => 'architecture',
                                        :root_device_type => 'root_device_type', :install_updates_on_boot => 'install_updates_on_boot',
-                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy')
+                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id')
       @instances = double('instances', :instances => [@instance1, @instance2])
       @new_instance = double('new_instance', :instances => [@instance3])
       @opsworks = double('opsworks', :describe_instances => @instances)
