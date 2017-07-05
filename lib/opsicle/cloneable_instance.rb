@@ -161,12 +161,23 @@ module Opsicle
         if ask_for_overriding_permission("subnet ID", true)
           instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
           subnet_ids = instances.collect { |i| i.subnet_id }.uniq
-          subnet_ids << "Provide a different subnet ID."
-          subnet_id = ask_for_possible_options(subnet_ids, "subnet ID")
+          zones_options = []
+
+          subnet_ids.each do |id|
+            subnet = Aws::EC2::Subnet.new(id: id)
+            zone_name = subnet.availability_zone
+            public_zone = subnet.map_public_ip_on_launch ? "public" : "private"
+            zones_options << "#{id} (#{public_zone} #{zone_name})"
+          end
+
+          zones_options << "Provide a different subnet ID."
+          subnet_id = ask_for_possible_options(zones_options, "subnet ID")
 
           if subnet_id == "Provide a different subnet ID."
             subnet_id = ask_for_new_option('subnet ID')
           end
+
+          subnet_id = subnet_id.scan(/(subnet-\S*)/).first.first
         else
           subnet_id = self.subnet_id
         end
