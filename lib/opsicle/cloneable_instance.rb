@@ -177,7 +177,7 @@ module Opsicle
             subnet_id = ask_for_new_option('subnet ID')
           end
 
-          subnet_id = subnet_id.scan(/(subnet-\S*)/).first.first
+          subnet_id = subnet_id.scan(/(subnet-\S*)/).first.first if subnet_id
         else
           subnet_id = self.subnet_id
         end

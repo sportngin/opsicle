@@ -117,6 +117,8 @@ module Opsicle
         instance = CloneableInstance.new(@instance, @layer, @opsworks, @cli)
         allow(@layer).to receive(:subnet_id).and_return(nil)
         allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this id? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(1)
+        subnet_dummy = double('subnet_dummy', :availability_zone => 'us-east-1b', :map_public_ip_on_launch => true)
+        allow(Aws::EC2::Subnet).to receive(:new).and_return(subnet_dummy)
         expect(instance).to receive(:ask_for_possible_options)
         instance.verify_subnet_id
       end
@@ -171,7 +173,6 @@ module Opsicle
         expect(instance).to receive(:auto_scaling_type)
         expect(instance).to receive(:os)
         expect(instance).to receive(:ssh_key_name)
-        expect(instance).to receive(:availability_zone)
         expect(instance).to receive(:virtualization_type)
         instance.create_new_instance('hostname', 'type', 'ami', 'agent_version', 'subnet_id')
       end
