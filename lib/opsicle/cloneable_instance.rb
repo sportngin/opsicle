@@ -212,9 +212,9 @@ module Opsicle
         os: self.os,
         ami_id: ami_id,
         ssh_key_name: self.ssh_key_name,
-        availability_zone: self.availability_zone,
-        virtualization_type: self.virtualization_type,
+        # availability_zone: self.availability_zone, # we don't need availability zone if subnet ID is set
         subnet_id: subnet_id,
+        virtualization_type: self.virtualization_type,
         architecture: self.architecture, # accepts x86_64, i386
         root_device_type: self.root_device_type, # accepts ebs, instance-store
         install_updates_on_boot: self.install_updates_on_boot,
