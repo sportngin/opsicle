@@ -32,16 +32,18 @@ module Opsicle
       @agent_version_3 = double('agent_version', :version => '3436-20160418214624')
       @agent_versions = double('agent_versions', :agent_versions => [@agent_version_1, @agent_version_2, @agent_version_3])
       allow(@opsworks).to receive(:describe_agent_versions).with({:stack_id=>1234567890}).and_return(@agent_versions)
-      tag1 = double('tag', :value => 'Subnet')
+      tag1 = double('tag', :value => 'Subnet', :key => 'Name')
       @tags = [tag1]
-      @subnet1 = double('subnet', :vpc_id => 'vpc-123456', :subnet_id => 'subnet-123456', :tags => @tags)
-      @subnet2 = double('subnet', :vpc_id => 'vpc-123456', :subnet_id => 'subnet-789123', :tags => @tags)
-      @subnet3 = double('subnet', :vpc_id => 'vpc-123456', :subnet_id => 'subnet-456789', :tags => @tags)
+      @subnet1 = double('subnet', :vpc_id => 'vpc-123456', :subnet_id => 'subnet-123456', :tags => @tags, :availability_zone => 'us-east-1b')
+      @subnet2 = double('subnet', :vpc_id => 'vpc-123456', :subnet_id => 'subnet-789123', :tags => @tags, :availability_zone => 'us-east-1b')
+      @subnet3 = double('subnet', :vpc_id => 'vpc-123456', :subnet_id => 'subnet-456789', :tags => @tags, :availability_zone => 'us-east-1b')
       @subnets = double('subnets', :subnets => [@subnet1, @subnet2, @subnet3])
       allow(@stack).to receive(:vpc_id).and_return('vpc-123456')
       @instances = double('instances', :instances => [@instance])
       allow(@ec2).to receive(:describe_subnets).and_return(@subnets)
       allow(@opsworks).to receive(:describe_instances).with({:stack_id=>1234567890}).and_return(@instances)
+      @current_subnet = double('subnet', :tags => @tags, :availability_zone => 'us-east-1b')
+      allow(Aws::EC2::Subnet).to receive(:new).and_return(@current_subnet)
       @cli = double('cli', :ask => 2)
     end
 
@@ -127,8 +129,6 @@ module Opsicle
         instance = CloneableInstance.new(@instance, @layer, @stack, @opsworks, @ec2, @cli)
         allow(@layer).to receive(:subnet_id).and_return(nil)
         allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this id? By overriding, you are choosing to override the current agent version for all instances you are cloning.\n1) Yes\n2) No", Integer).and_return(1)
-        subnet_dummy = double('subnet_dummy', :availability_zone => 'us-east-1b', :map_public_ip_on_launch => true)
-        allow(Aws::EC2::Subnet).to receive(:new).and_return(subnet_dummy)
         expect(instance).to receive(:ask_for_possible_options)
         instance.verify_subnet_id
       end

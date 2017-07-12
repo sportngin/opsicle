@@ -44,6 +44,10 @@ module Opsicle
       @agent_version_3 = double('agent_version', :version => '3436-20160418214624')
       @agent_versions = double('agent_versions', :agent_versions => [@agent_version_1, @agent_version_2, @agent_version_3])
       allow(@opsworks).to receive(:describe_agent_versions).and_return(@agent_versions)
+      tag1 = double('tag', :value => 'Subnet', :key => 'Name')
+      @tags = [tag1]
+      @current_subnet = double('subnet', :tags => @tags, :availability_zone => 'us-east-1b')
+      allow(Aws::EC2::Subnet).to receive(:new).and_return(@current_subnet)
       allow_any_instance_of(HighLine).to receive(:ask).with("Layer?\n", Integer).and_return(2)
       allow_any_instance_of(HighLine).to receive(:ask).with("Instances? (enter as a comma separated list)\n", String).and_return('2')
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this hostname?\n1) Yes\n2) No", Integer).and_return(2)

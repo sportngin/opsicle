@@ -113,6 +113,15 @@ module Opsicle
       !sibling_hostnames.include?(name)
     end
 
+    def find_subnet_name(subnet)
+      tags = subnet.tags
+      tag = nil
+      tags.each do |t|
+        tag = t if t.key == 'Name'
+      end
+      tag.value if tag
+    end
+
     def verify_ami_id
       if self.layer.ami_id
         ami_id = self.layer.ami_id
@@ -160,7 +169,9 @@ module Opsicle
       if self.layer.subnet_id
         subnet_id = self.layer.subnet_id
       else
-        puts "\nCurrent availability zone is #{self.availability_zone} (#{self.subnet_id})"
+        current_subnet = Aws::EC2::Subnet.new(id: self.subnet_id)
+        tag_name = find_subnet_name(current_subnet)
+        puts "\nCurrent subnet ID is \"#{tag_name}\" #{current_subnet.availability_zone} (#{self.subnet_id})"
 
         if ask_for_overriding_permission("subnet ID", true)
           ec2_subnets = ec2.describe_subnets.subnets
@@ -168,9 +179,10 @@ module Opsicle
 
           ec2_subnets.each do |subnet|
             if subnet.vpc_id == stack.vpc_id
-              zone_name = subnet.tags.first.value
+              tag_name = find_subnet_name(subnet)
+              zone_name = subnet.availability_zone
               subnet_id = subnet.subnet_id
-              subnets << "#{zone_name} (#{subnet_id})"
+              subnets << "\"#{tag_name}\" #{zone_name} (#{subnet_id})"
             end
           end
 
