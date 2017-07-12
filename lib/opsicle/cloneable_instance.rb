@@ -4,6 +4,7 @@ module Opsicle
       :hostname,
       :status,
       :layer,
+      :stack,
       :ami_id,
       :instance_type,
       :instance_id,
@@ -23,13 +24,15 @@ module Opsicle
       :ebs_optimized,
       :tenancy,
       :opsworks,
+      :ec2,
       :cli
     )
 
-    def initialize(instance, layer, opsworks, cli)
+    def initialize(instance, layer, stack, opsworks, ec2, cli)
       self.hostname = instance.hostname
       self.status = instance.status
       self.layer = layer
+      self.stack = stack
       self.ami_id = instance.ami_id
       self.instance_type = instance.instance_type
       self.agent_version = instance.agent_version
@@ -47,6 +50,7 @@ module Opsicle
       self.ebs_optimized = instance.ebs_optimized
       self.tenancy = instance.tenancy
       self.opsworks = opsworks
+      self.ec2 = ec2
       self.cli = cli
       self.instance_id = instance.instance_id
       self.new_instance_id = nil
@@ -156,28 +160,23 @@ module Opsicle
       if self.layer.subnet_id
         subnet_id = self.layer.subnet_id
       else
-        puts "\nCurrent subnet id is #{self.subnet_id}"
+        puts "\nCurrent availability zone is #{self.availability_zone} (#{self.subnet_id})"
 
         if ask_for_overriding_permission("subnet ID", true)
-          instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
-          subnet_ids = instances.collect { |i| i.subnet_id }.uniq
-          zones_options = []
+          ec2_subnets = ec2.describe_subnets.subnets
+          subnets = []
 
-          subnet_ids.each do |id|
-            subnet = Aws::EC2::Subnet.new(id: id)
-            zone_name = subnet.availability_zone
-            public_zone = subnet.map_public_ip_on_launch ? "public" : "private"
-            zones_options << "#{id} (#{public_zone} #{zone_name})"
+          ec2_subnets.each do |subnet|
+            if subnet.vpc_id == stack.vpc_id
+              zone_name = subnet.tags.first.value
+              subnet_id = subnet.subnet_id
+              subnets << "#{zone_name} (#{subnet_id})"
+            end
           end
 
-          zones_options << "Provide a different subnet ID."
-          subnet_id = ask_for_possible_options(zones_options, "subnet ID")
-
-          if subnet_id == "Provide a different subnet ID."
-            subnet_id = ask_for_new_option('subnet ID')
-          end
-
-          subnet_id = subnet_id.scan(/(subnet-\S*)/).first.first if subnet_id
+          subnets = subnets.sort
+          subnet_id = ask_for_possible_options(subnets, "subnet ID")
+          subnet_id = subnet_id.scan(/(subnet-[a-z0-9]*)/).first.first if subnet_id
         else
           subnet_id = self.subnet_id
         end

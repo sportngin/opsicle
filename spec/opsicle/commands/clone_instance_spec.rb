@@ -29,13 +29,14 @@ module Opsicle
       @layer2 = double('layer2', :name => 'layer-2', :layer_id => 67890, :instances => [@instance1, @instance2])
       @layers = double('layers', :layers => [@layer1, @layer2])
       @new_instance = double('new_instance', :instance_id => 1029384756)
-      @stack = double('stack')
+      @stack = double('stack', :vpc_id => "vpc-123456")
       @stacks = double('stacks', :stacks => [@stack])
       @opsworks = double('opsworks', :describe_instances => @instances, :describe_layers => @layers,
                                      :create_instance => @new_instance, :describe_stacks => @stacks,
                                      :start_instance => @new_instance)
+      @ec2 = double('ec2')
       @config = double('config', :opsworks_config => {:stack_id => 1234567890})
-      @client = double('client', :config => @config, :opsworks => @opsworks)
+      @client = double('client', :config => @config, :opsworks => @opsworks, :ec2 => @ec2)
       allow(Client).to receive(:new).with(:environment).and_return(@client)
       allow(@instances).to receive(:each_with_index)
       @agent_version_1 = double('agent_version', :version => '3434-20160316181345')
@@ -93,7 +94,8 @@ module Opsicle
       it "generates a new AWS client from the given configs" do
         @config = double('config', :opsworks_config => {:stack_id => 1234567890})
         @client = double('client', :config => @config,
-                                   :opsworks => @opsworks)
+                                   :opsworks => @opsworks,
+                                   :ec2 => @ec2)
         expect(Client).to receive(:new).with(:environment).and_return(@client)
         CloneInstance.new(:environment)
       end
