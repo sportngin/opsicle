@@ -116,9 +116,7 @@ module Opsicle
     def find_subnet_name(subnet)
       tags = subnet.tags
       tag = nil
-      tags.each do |t|
-        tag = t if t.key == 'Name'
-      end
+      tags.each { |t| tag = t if t.key == 'Name' }
       tag.value if tag
     end
 
@@ -170,8 +168,8 @@ module Opsicle
         subnet_id = self.layer.subnet_id
       else
         current_subnet = Aws::EC2::Subnet.new(id: self.subnet_id)
-        tag_name = find_subnet_name(current_subnet)
-        puts "\nCurrent subnet ID is \"#{tag_name}\" #{current_subnet.availability_zone} (#{self.subnet_id})"
+        subnet_name = find_subnet_name(current_subnet)
+        puts "\nCurrent subnet ID is \"#{subnet_name}\" #{current_subnet.availability_zone} (#{self.subnet_id})"
 
         if ask_for_overriding_permission("subnet ID", true)
           ec2_subnets = ec2.describe_subnets.subnets
@@ -179,10 +177,10 @@ module Opsicle
 
           ec2_subnets.each do |subnet|
             if subnet.vpc_id == stack.vpc_id
-              tag_name = find_subnet_name(subnet)
+              subnet_name = find_subnet_name(subnet)
               zone_name = subnet.availability_zone
               subnet_id = subnet.subnet_id
-              subnets << "\"#{tag_name}\" #{zone_name} (#{subnet_id})"
+              subnets << "\"#{subnet_name}\" #{zone_name} (#{subnet_id})"
             end
           end
 
