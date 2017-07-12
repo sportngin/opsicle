@@ -222,7 +222,7 @@ module Opsicle
         os: self.os,
         ami_id: ami_id,
         ssh_key_name: self.ssh_key_name,
-        # availability_zone: self.availability_zone, # we don't need availability zone if subnet ID is set
+        # availability_zone: self.availability_zone,
         subnet_id: subnet_id,
         virtualization_type: self.virtualization_type,
         architecture: self.architecture, # accepts x86_64, i386
