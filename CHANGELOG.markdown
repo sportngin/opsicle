@@ -1,3 +1,8 @@
+#### v2.9.0
+* Make new clones of instances with only the Subnet ID
+
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/129
+
 #### v2.8.0
 * opsicle clone-instance --with-defaults environment
 
