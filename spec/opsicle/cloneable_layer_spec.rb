@@ -36,18 +36,20 @@ module Opsicle
       @instances = double('instances', :instances => [@instance1, @instance2])
       @new_instance = double('new_instance', :instances => [@instance3])
       @opsworks = double('opsworks', :describe_instances => @instances)
+      @ec2 = double('ec2')
+      @stack = double('stack')
     end
 
     context "#get_cloneable_instances" do
       it "should gather opsworks instances for that layer" do
-        layer = CloneableLayer.new('layer-name', 12345, @opsworks, @cli)
+        layer = CloneableLayer.new('layer-name', 12345, @stack, @opsworks, @ec2, @cli)
         expect(@opsworks).to receive(:describe_instances).and_return(@instances)
         expect(@instances).to receive(:instances)
         layer.get_cloneable_instances
       end
 
       it "should make a new CloneableInstance for each instance" do
-        layer = CloneableLayer.new('layer-name', 12345, @opsworks, @cli)
+        layer = CloneableLayer.new('layer-name', 12345, @stack, @opsworks, @ec2, @cli)
         expect(CloneableInstance).to receive(:new).twice
         layer.get_cloneable_instances
       end
@@ -55,14 +57,14 @@ module Opsicle
 
     context "#add_new_instance" do
       it "should accurately find a new instance via instance_id" do
-        layer = CloneableLayer.new('layer-name', 12345, @opsworks, @cli)
+        layer = CloneableLayer.new('layer-name', 12345, @stack, @opsworks, @ec2, @cli)
         expect(@opsworks).to receive(:describe_instances).and_return(@new_instance)
         expect(@new_instance).to receive(:instances)
         layer.add_new_instance('456-789')
       end
 
       it "should add the new instance to the instances array" do
-        layer = CloneableLayer.new('layer-name', 12345, @opsworks, @cli)
+        layer = CloneableLayer.new('layer-name', 12345, @stack, @opsworks, @ec2, @cli)
         expect(@opsworks).to receive(:describe_instances).and_return(@new_instance)
         expect(CloneableInstance).to receive(:new).once
         layer.add_new_instance('456-789')

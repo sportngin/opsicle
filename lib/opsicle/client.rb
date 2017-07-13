@@ -3,6 +3,7 @@ require 'opsicle/config'
 module Opsicle
   class Client
     attr_reader :opsworks
+    attr_reader :ec2
     attr_reader :s3
     attr_reader :config
 
@@ -14,6 +15,7 @@ module Opsicle
       aws_opts = {region: region}
       aws_opts[:credentials] = credentials unless credentials.nil?
       @opsworks = Aws::OpsWorks::Client.new aws_opts
+      @ec2 = Aws::EC2::Client.new aws_opts
       @s3 = Aws::S3::Client.new aws_opts
     end
 

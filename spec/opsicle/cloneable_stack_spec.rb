@@ -6,7 +6,7 @@ require "opsicle/user_profile"
 module Opsicle
   describe CloneableStack do
     before do
-      @stack = double('stack')
+    @stack = double('stack', :vpc_id => 'vpc-123456')
       @stacks = double('stacks', :stacks => [@stack])
       @opsworks = double('opsworks', :describe_stacks => @stacks)
     end

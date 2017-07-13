@@ -4,6 +4,7 @@ module Opsicle
       :hostname,
       :status,
       :layer,
+      :stack,
       :ami_id,
       :instance_type,
       :instance_id,
@@ -23,13 +24,15 @@ module Opsicle
       :ebs_optimized,
       :tenancy,
       :opsworks,
+      :ec2,
       :cli
     )
 
-    def initialize(instance, layer, opsworks, cli)
+    def initialize(instance, layer, stack, opsworks, ec2, cli)
       self.hostname = instance.hostname
       self.status = instance.status
       self.layer = layer
+      self.stack = stack
       self.ami_id = instance.ami_id
       self.instance_type = instance.instance_type
       self.agent_version = instance.agent_version
@@ -47,6 +50,7 @@ module Opsicle
       self.ebs_optimized = instance.ebs_optimized
       self.tenancy = instance.tenancy
       self.opsworks = opsworks
+      self.ec2 = ec2
       self.cli = cli
       self.instance_id = instance.instance_id
       self.new_instance_id = nil
@@ -109,6 +113,13 @@ module Opsicle
       !sibling_hostnames.include?(name)
     end
 
+    def find_subnet_name(subnet)
+      tags = subnet.tags
+      tag = nil
+      tags.each { |t| tag = t if t.key == 'Name' }
+      tag.value if tag
+    end
+
     def verify_ami_id
       if self.layer.ami_id
         ami_id = self.layer.ami_id
@@ -156,17 +167,26 @@ module Opsicle
       if self.layer.subnet_id
         subnet_id = self.layer.subnet_id
       else
-        puts "\nCurrent subnet id is #{self.subnet_id}"
+        current_subnet = Aws::EC2::Subnet.new(id: self.subnet_id)
+        subnet_name = find_subnet_name(current_subnet)
+        puts "\nCurrent subnet ID is \"#{subnet_name}\" #{current_subnet.availability_zone} (#{self.subnet_id})"
 
         if ask_for_overriding_permission("subnet ID", true)
-          instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
-          subnet_ids = instances.collect { |i| i.subnet_id }.uniq
-          subnet_ids << "Provide a different subnet ID."
-          subnet_id = ask_for_possible_options(subnet_ids, "subnet ID")
+          ec2_subnets = ec2.describe_subnets.subnets
+          subnets = []
 
-          if subnet_id == "Provide a different subnet ID."
-            subnet_id = ask_for_new_option('subnet ID')
+          ec2_subnets.each do |subnet|
+            if subnet.vpc_id == stack.vpc_id
+              subnet_name = find_subnet_name(subnet)
+              zone_name = subnet.availability_zone
+              subnet_id = subnet.subnet_id
+              subnets << "\"#{subnet_name}\" #{zone_name} (#{subnet_id})"
+            end
           end
+
+          subnets = subnets.sort
+          subnet_id = ask_for_possible_options(subnets, "subnet ID")
+          subnet_id = subnet_id.scan(/(subnet-[a-z0-9]*)/).first.first if subnet_id
         else
           subnet_id = self.subnet_id
         end
@@ -212,9 +232,9 @@ module Opsicle
         os: self.os,
         ami_id: ami_id,
         ssh_key_name: self.ssh_key_name,
-        availability_zone: self.availability_zone,
-        virtualization_type: self.virtualization_type,
+        # availability_zone: self.availability_zone,
         subnet_id: subnet_id,
+        virtualization_type: self.virtualization_type,
         architecture: self.architecture, # accepts x86_64, i386
         root_device_type: self.root_device_type, # accepts ebs, instance-store
         install_updates_on_boot: self.install_updates_on_boot,
