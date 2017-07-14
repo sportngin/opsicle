@@ -1,3 +1,8 @@
+#### v2.9.1
+* Display Layer short name instead of readable name to make it easier to copy/paste
+
+  > Tim Sandquist: Vivek Bisen, Unknown User: https://github.com/sportngin/opsicle/pull/125
+
 #### v2.9.0
 * Make new clones of instances with only the Subnet ID
 
