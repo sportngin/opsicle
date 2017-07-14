@@ -27,7 +27,7 @@ module Opsicle
     end
 
     def layer_name(layer_id)
-      layers.detect{ |layer| layer[:layer_id] == layer_id }[:name]
+      layers.detect{ |layer| layer[:layer_id] == layer_id }[:shortname]
     end
 
   end
