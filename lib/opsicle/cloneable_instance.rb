@@ -218,7 +218,7 @@ module Opsicle
 
     def ask_for_overriding_permission(description, overriding_all)
       if overriding_all
-        ans = @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all instances you are cloning.\n1) Yes\n2) No", Integer)
+        ans = @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all of the following instances you're cloning.\n1) Yes\n2) No", Integer)
       else
         ans = @cli.ask("Do you wish to override this #{description}?\n1) Yes\n2) No", Integer)
       end
