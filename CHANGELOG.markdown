@@ -1,3 +1,8 @@
+#### v2.9.3
+* Fix bug where cloning multiple instances will always result in the same subnet zones, AMIs, and agent versions
+
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/130
+
 #### v2.9.2
 #### v2.9.1
 * Display Layer short name instead of readable name to make it easier to copy/paste
