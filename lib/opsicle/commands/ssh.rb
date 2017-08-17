@@ -12,20 +12,28 @@ module Opsicle
 
     def execute(options={})
 
-      if instances.length == 1
-        choice = 1
-      else
-        Output.say "Choose an Opsworks instance:"
-        instances.each_with_index do |instance, index|
-          Output.say "#{index+1}) #{instance[:hostname]} #{instance_info(instance)}"
+      if options[:all]
+        instances.each do |instance|
+          Output.say("\n#{instance[:hostname]} #{instance_info(instance)}", :headline)
+          command = ssh_command(instance, options)
+          system(command)
         end
-        choice = Output.ask("? ", Integer) { |q| q.in = 1..instances.length }
+      else
+
+        if instances.length == 1
+          choice = 1
+        else
+          Output.say "Choose an Opsworks instance:"
+          instances.each_with_index do |instance, index|
+            Output.say "#{index+1}) #{instance[:hostname]} #{instance_info(instance)}"
+          end
+          choice = Output.ask("? ", Integer) { |q| q.in = 1..instances.length }
+        end
+
+        command = ssh_command(instances[choice-1], options)
+        Output.say_verbose "Executing shell command: #{command}"
+        system(command)
       end
-
-      command = ssh_command(instances[choice-1], options)
-
-      Output.say_verbose "Executing shell command: #{command}"
-      system(command)
     end
 
     def instances
@@ -61,7 +69,7 @@ module Opsicle
 
     def ssh_ip(instance)
       if client.config.opsworks_config[:internal_ssh_only]
-        Output.say "This stack requires a private connection, only using internal IPs."
+        Output.say_verbose "This stack requires a private connection, only using internal IPs."
         instance[:private_ip]
       else
         instance[:elastic_ip] || instance[:public_ip]

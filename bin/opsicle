@@ -90,9 +90,22 @@ arg_name '<environment>'
 command :ssh do |c|
   c.flag [:o, :"ssh-opts"], :desc => "SSH command line options.", :must_match => '/"[^"]+"/'
   c.flag [:c, :"ssh-cmd"], :desc => "Command to pass to SSH", :must_match => '/"[^"]+"/'
+  c.flag [:a, :"run-ssh-cmd-on-all"], :desc => "Run SSH command on all instances.", :must_match => '/"[^"]+"/'
   c.action do |global_options, options, args|
     raise ArgumentError, "Environment is required" unless args.first
     Opsicle::SSH.new(args.first).execute global_options.merge(options)
+  end
+end
+
+desc "Execute arbitrary commands on the stack instances via SSH."
+arg_name '<environment>'
+arg_name '<command>'
+command 'execute-command' do |c|
+  c.flag   [:l, :layers],       :desc => 'The specific layers to execute recipes on', :type => Array
+  c.action do |global_options, options, args|
+    raise ArgumentError, "Environment is required" unless args.first
+
+    Opsicle::ExecuteCommand.new(*args).execute global_options.merge(options)
   end
 end
 

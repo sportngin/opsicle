@@ -18,6 +18,7 @@ module Opsicle
           :addition => [:bold, :green],
           :removal => [:bold, :red],
           :modification => [:bold, :yellow],
+          :headline => [:black, :on_white]
       )
     end
 
