@@ -18,7 +18,7 @@ module Opsicle
     end
 
     def print(instances)
-      puts Terminal::Table.new headings: ['Hostname', 'Layers', 'Status', 'Public IP', 'Private ID'], rows: instance_data(instances)
+      puts Terminal::Table.new headings: ['Hostname', 'Layers', 'Status', 'Public IP', 'Private IP'], rows: instance_data(instances)
     end
 
     def instance_data(instances)
