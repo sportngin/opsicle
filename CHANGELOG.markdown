@@ -1,3 +1,8 @@
+#### v2.9.4
+* Show private IPs of instances in `opsicle instances env` command
+
+  > Vivek Bisen: Tim Sandquist, Unknown User: https://github.com/sportngin/opsicle/pull/132
+
 #### v2.9.3
 * Fix bug where cloning multiple instances will always result in the same subnet zones, AMIs, and agent versions
 
