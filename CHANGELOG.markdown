@@ -1,3 +1,4 @@
+#### v2.9.6
 #### v2.9.5
 #### v2.9.4
 * Show private IPs of instances in `opsicle instances env` command
