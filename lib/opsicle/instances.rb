@@ -15,6 +15,10 @@ module Opsicle
     end
 
     def self.pretty_ip(instance)
+      instance[:elastic_ip] ? "#{instance[:elastic_ip]} EIP" : instance[:public_ip]
+    end
+
+    def self.private_ip(instance)
       instance[:private_ip]
     end
 
