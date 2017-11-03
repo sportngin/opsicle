@@ -34,11 +34,11 @@ Opsicle v2+ uses AWS SDK shared credentials.  See: https://aws.amazon.com/blogs/
 # ~/.aws/credentials
 
 [staging]
-  aws_access_key_id = YOUR_AWS_ACCESS_KEY
-  aws_secret_access_key = YOUR_AWS_SECRET_ACCESS_KEY
+aws_access_key_id = YOUR_AWS_ACCESS_KEY
+aws_secret_access_key = YOUR_AWS_SECRET_ACCESS_KEY
 [production]
-  aws_access_key_id: YOUR_AWS_ACCESS_KEY
-  aws_secret_access_key = YOUR_AWS_SECRET_ACCESS_KEY
+aws_access_key_id: YOUR_AWS_ACCESS_KEY
+aws_secret_access_key = YOUR_AWS_SECRET_ACCESS_KEY
 ```
 
 ## Using Opsicle
