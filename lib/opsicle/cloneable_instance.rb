@@ -75,6 +75,7 @@ module Opsicle
       new_hostname = auto_generated_hostname
       create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
       opsworks.start_instance(instance_id: new_instance_id)
+      add_tags
       puts "\nNew instance is starting…"
     end
 
@@ -189,7 +190,7 @@ module Opsicle
           subnets = subnets.sort
           subnet_id = ask_for_possible_options(subnets, "subnet ID")
           subnet_id = subnet_id.scan(/(subnet-[a-z0-9]*)/).first.first if subnet_id
-          
+
           self.layer.subnet_id = subnet_id   # only set the subnet ID for whole layer if they override it
         else
           subnet_id = self.subnet_id
@@ -266,7 +267,7 @@ module Opsicle
           tags << define_tag
         end
 
-        ec2_instance_id = @opsworks.describe_instances(instance_ids: [new_instance_id]).instances.first.ec2_instance_id
+        ec2_instance_id = @opsworks.describe_instances(instance_ids: [new_instance_id || instance_id]).instances.first.ec2_instance_id
         @ec2.create_tags(resources: [ ec2_instance_id ], tags: tags)
       end
     end
