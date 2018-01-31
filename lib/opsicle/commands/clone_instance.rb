@@ -43,7 +43,7 @@ module Opsicle
         layers << CloneableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
       end
 
-      layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}"}
+      layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
       layer_index = @cli.ask("Layer?\n", Integer) { |q| q.in = 1..layers.length.to_i } - 1
       layers[layer_index]
     end
