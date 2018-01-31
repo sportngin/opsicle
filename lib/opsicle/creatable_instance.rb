@@ -38,13 +38,18 @@ module Opsicle
     end
 
     def create(options)
-      puts "\nCloning an instance..."
+      puts "\nCreating an instance..."
 
       new_instance_hostname = make_new_hostname
+      puts ""
       ami_id = select_ami_id
+      puts ""
       agent_version = select_agent_version
+      puts ""
       subnet_id = select_subnet_id
+      puts ""
       instance_type = ask_for_new_option('instance type')
+      puts ""
 
       create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
       start_new_instance
@@ -53,15 +58,17 @@ module Opsicle
     def make_new_hostname
       new_instance_hostname = auto_generated_hostname
       puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
-      new_instance_hostname = ask_for_new_option("instance's hostname")
+      new_instance_hostname = ask_for_new_option("instance's hostname") if ask_for_overriding_permission("hostname", false)
       new_instance_hostname
+    end
+
+    def hostname
+      self.layer.instances.first.hostname
     end
 
     def auto_generated_hostname
       if hostname =~ /\d\d\z/
         increment_hostname
-      else
-        hostname << "-clone"
       end
     end
 
@@ -93,7 +100,7 @@ module Opsicle
     end
 
     def select_ami_id
-      instances = @opsworks.describe_instances(stack_id: self.stack_id).instances
+      instances = @opsworks.describe_instances(stack_id: @stack.id).instances
       ami_ids = instances.collect { |i| i.ami_id }.uniq
       ami_ids << "Provide a different AMI ID."
       ami_id = ask_for_possible_options(ami_ids, "AMI ID")
@@ -108,7 +115,7 @@ module Opsicle
     end
 
     def select_agent_version
-      agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
+      agents = @opsworks.describe_agent_versions(stack_id: @stack.id).agent_versions
       version_ids = agents.collect { |i| i.version }.uniq
       agent_version = ask_for_possible_options(version_ids, "agent version")
       self.layer.agent_version = agent_version
@@ -136,6 +143,10 @@ module Opsicle
       subnet_id
     end
 
+    def os
+      self.layer.instances.first.os
+    end
+
     def ask_for_possible_options(arr, description)
       arr.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
       id_index = @cli.ask("Which #{description}?\n", Integer) { |q| q.in = 1..arr.length.to_i } - 1
@@ -146,19 +157,29 @@ module Opsicle
       @cli.ask("Please write in the new #{description} and press ENTER:")
     end
 
+    def ask_for_overriding_permission(description, overriding_all)
+      if overriding_all
+        ans = @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all of the following instances you're cloning.\n1) Yes\n2) No", Integer)
+      else
+        ans = @cli.ask("Do you wish to override this #{description}?\n1) Yes\n2) No", Integer)
+      end
+      ans == 1
+    end
+
     def create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
       new_instance = @opsworks.create_instance({
-        stack_id: self.stack_id, # required
-        layer_ids: self.layer_ids, # required
+        stack_id: self.stack.id, # required
+        layer_ids: [self.layer.layer_id], # required
         instance_type: instance_type, # required
         hostname: new_instance_hostname,
         ami_id: ami_id,
         subnet_id: subnet_id,
-        agent_version: agent_version
+        agent_version: agent_version,
+        os: os
       })
       self.new_instance_id = new_instance.instance_id
       self.layer.add_new_instance(new_instance_id)
-      puts "\nNew instance #{new_instance_hostname} has been created: #{new_instance_id}"
+      puts "New instance #{new_instance_hostname} has been created: #{new_instance_id}"
     end
 
     def start_new_instance

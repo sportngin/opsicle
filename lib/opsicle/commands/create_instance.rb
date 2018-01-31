@@ -1,7 +1,7 @@
 require 'gli'
 require "opsicle/user_profile"
 require "opsicle/cloneable_layer"
-require "opsicle/cloneable_instance"
+require "opsicle/creatable_instance"
 require "opsicle/cloneable_stack"
 
 module Opsicle
