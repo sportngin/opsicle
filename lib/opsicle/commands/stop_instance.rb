@@ -1,8 +1,8 @@
 require 'gli'
 require "opsicle/user_profile"
-require "opsicle/cloneable_layer"
-require "opsicle/cloneable_instance"
-require "opsicle/cloneable_stack"
+require "opsicle/manageable_layer"
+require "opsicle/manageable_instance"
+require "opsicle/manageable_stack"
 
 module Opsicle
   class StopInstance
@@ -12,7 +12,7 @@ module Opsicle
       @opsworks = @client.opsworks
       @ec2 = @client.ec2
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = CloneableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
+      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
     end
 

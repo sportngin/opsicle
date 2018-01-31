@@ -1,8 +1,8 @@
 require 'gli'
 require "opsicle/user_profile"
-require "opsicle/cloneable_layer"
-require "opsicle/cloneable_instance"
-require "opsicle/cloneable_stack"
+require "opsicle/manageable_layer"
+require "opsicle/manageable_instance"
+require "opsicle/manageable_stack"
 
 module Opsicle
   class MoveEip
@@ -13,7 +13,7 @@ module Opsicle
       @ec2 = @client.ec2
       stack_id = @client.config.opsworks_config[:stack_id]
       @cli = HighLine.new
-      @stack = CloneableStack.new(@client.config.opsworks_config[:stack_id], @opsworks, @cli)
+      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks, @cli)
     end
 
     def execute(options={})
