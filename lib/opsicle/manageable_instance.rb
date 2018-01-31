@@ -1,5 +1,5 @@
 module Opsicle
-  class CloneableInstance
+  class ManageableInstance
     attr_accessor(
       :hostname,
       :status,
