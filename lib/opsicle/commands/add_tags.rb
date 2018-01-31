@@ -1,18 +1,18 @@
 require 'gli'
 require "opsicle/user_profile"
-require "opsicle/manageable_layer"
-require "opsicle/manageable_instance"
-require "opsicle/manageable_stack"
+require "opsicle/cloneable_layer"
+require "opsicle/cloneable_instance"
+require "opsicle/cloneable_stack"
 
 module Opsicle
-  class CloneInstance
+  class AddTags
 
     def initialize(environment)
       @client = Client.new(environment)
       @opsworks = @client.opsworks
       @ec2 = @client.ec2
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
+      @stack = CloneableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
     end
 
@@ -20,18 +20,12 @@ module Opsicle
       puts "Stack ID = #{@stack.id}"
       layer = select_layer
       all_instances = layer.get_cloneable_instances
-      instance_to_clone = select_instances(all_instances)
-      clone_instances(instance_to_clone, options)
-      layer.ami_id = nil
-      layer.agent_version = nil
+      instances_to_add_tags = select_instances(all_instances)
+      add_tags_to_instances(instances_to_add_tags)
     end
 
-    def clone_instances(instances, options)
-      if options[:'with-defaults']
-        instances.each { |instance| instance.clone_with_defaults(options) }
-      else
-        instances.each { |instance| instance.clone(options) }
-      end
+    def add_tags_to_instances(instances)
+      instances.each { |instance| instance.add_tags({add_tags_mode: true}) }
     end
 
     def select_layer
@@ -40,7 +34,7 @@ module Opsicle
 
       layers = []
       ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
+        layers << CloneableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
       end
 
       layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }

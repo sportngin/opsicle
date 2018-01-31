@@ -75,6 +75,7 @@ module Opsicle
       new_hostname = auto_generated_hostname
       create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
       opsworks.start_instance(instance_id: new_instance_id)
+      add_tags
       puts "\nNew instance is starting…"
     end
 
@@ -254,7 +255,38 @@ module Opsicle
       if ask_to_start_instance
         @opsworks.start_instance(instance_id: self.new_instance_id)
         puts "\nNew instance is starting…"
+        add_tags
       end
+    end
+
+    def add_tags(options={})
+      raise ArgumentError, 'The instance must be running to add tags' if options[:add_tags_mode] && @status != "online"
+
+      if ask_to_add_tags
+        tags = []
+
+        tag_count.times do
+          tags << define_tag
+        end
+
+        ec2_instance_id = @opsworks.describe_instances(instance_ids: [new_instance_id || instance_id]).instances.first.ec2_instance_id
+        @ec2.create_tags(resources: [ ec2_instance_id ], tags: tags)
+      end
+    end
+
+    def define_tag
+      tag_key = ask_for_new_option('tag name')
+      tag_value = ask_for_new_option('tag value')
+      { key: tag_key, value: tag_value }
+    end
+
+    def tag_count
+      @cli.ask("How many tags do you wish to add? Please write in the number as an integer and press ENTER:").to_i
+    end
+
+    def ask_to_add_tags
+      ans = @cli.ask("\nDo you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer)
+      ans == 1
     end
 
     def ask_to_start_instance
