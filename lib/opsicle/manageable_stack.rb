@@ -1,11 +1,6 @@
 module Opsicle
-<<<<<<< HEAD:lib/opsicle/manageable_stack.rb
   class ManageableStack
-    attr_accessor :id, :opsworks, :stack, :vpc_id
-=======
-  class CloneableStack
     attr_accessor :id, :opsworks, :stack, :vpc_id, :eips, :cli
->>>>>>> origin/master:lib/opsicle/cloneable_stack.rb
 
     def initialize(stack_id, opsworks, cli=nil)
       self.id = stack_id
