@@ -45,6 +45,7 @@ module Opsicle
     def ask_which_target_instance(moveable_eip)
       puts "\nHere are all of the instances in the current instance's layer:"
       instances = @opsworks.describe_instances(layer_id: moveable_eip[:layer_id]).instances
+      instances = instances.select { |instance| instance.elastic_ip.nil? && instance.auto_scaling_type.nil? }
       instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
       instance_index = @cli.ask("What is your target instance?\n", Integer) { |q| q.in = 1..instances.length.to_i } - 1
       instances[instance_index].instance_id
@@ -68,7 +69,7 @@ module Opsicle
     end
 
     def deleteable_instances
-      instances.select{|instance| instance.auto_scaling_type.nil?  && instance.status == "stopped"}
+      instances.select{ |instance| instance.auto_scaling_type.nil?  && instance.status == "stopped" }
     end
 
     def stoppable_states
@@ -76,7 +77,7 @@ module Opsicle
     end
 
     def stoppable_instances
-      instances.select{|instance| instance.elastic_ip.nil?  && stoppable_states.include?(instance.status)}
+      instances.select{ |instance| instance.elastic_ip.nil?  && stoppable_states.include?(instance.status) }
     end
   end
 end
