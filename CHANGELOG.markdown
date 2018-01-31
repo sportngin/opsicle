@@ -1,3 +1,8 @@
+#### v2.10.0
+* Rename cloneable things to manageable things
+
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/137
+
 #### v2.9.6
 #### v2.9.5
 #### v2.9.4
