@@ -25,7 +25,7 @@ module Opsicle
     end
 
     def add_tags_to_instances(instances)
-      instances.each { |instance| instance.add_tags() }
+      instances.each { |instance| instance.add_tags({add_tags_mode: true}) }
     end
 
     def select_layer
