@@ -31,7 +31,6 @@ module Opsicle
 
     def stoppable_instances
       @stack.stoppable_instances
-
     end
 
     def select_instances
