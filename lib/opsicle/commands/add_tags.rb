@@ -5,7 +5,7 @@ require "opsicle/cloneable_instance"
 require "opsicle/cloneable_stack"
 
 module Opsicle
-  class CloneInstance
+  class AddTags
 
     def initialize(environment)
       @client = Client.new(environment)
@@ -20,18 +20,12 @@ module Opsicle
       puts "Stack ID = #{@stack.id}"
       layer = select_layer
       all_instances = layer.get_cloneable_instances
-      instance_to_clone = select_instances(all_instances)
-      clone_instances(instance_to_clone, options)
-      layer.ami_id = nil
-      layer.agent_version = nil
+      instances_to_add_tags = select_instances(all_instances)
+      add_tags_to_instances(instances_to_add_tags)
     end
 
-    def clone_instances(instances, options)
-      if options[:'with-defaults']
-        instances.each { |instance| instance.clone_with_defaults(options) }
-      else
-        instances.each { |instance| instance.clone(options) }
-      end
+    def add_tags_to_instances(instances)
+      instances.each { |instance| instance.add_tags({add_tags_mode: true}) }
     end
 
     def select_layer
