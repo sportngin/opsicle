@@ -61,7 +61,7 @@ module Opsicle
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this subnet ID? By overriding, you are choosing to override the current subnet ID for all of the following instances you're cloning.\n1) Yes\n2) No", Integer).and_return(2)
       allow_any_instance_of(HighLine).to receive(:ask).with("Which subnet ID?\n", Integer).and_return(1)
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to start this new instance?\n1) Yes\n2) No", Integer).and_return(1)
-      allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer).and_return(2)
+      allow_any_instance_of(HighLine).to receive(:ask).with("\nDo you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer).and_return(2)
     end
 
     context "#execute" do
