@@ -206,7 +206,6 @@ end
 desc "Create an instance in the given environment stack"
 arg_name '<environment>'
 command 'create-instance' do |c|
-  c.switch [:d, :'with-defaults'], desc: "Create the instances with no overrides", default_value: false
   c.action do |global_options, options, args|
     raise ArgumentError, "Environment is required" unless args.first
     Opsicle::CreateInstance.new(args.first).execute global_options.merge options
@@ -216,7 +215,6 @@ end
 desc "Move EIPs between instances"
 arg_name '<environment>'
 command 'move-eip' do |c|
-  c.switch [:d, :'with-defaults'], desc: "Create the instances with no overrides", default_value: false
   c.action do |global_options, options, args|
     raise ArgumentError, "Environment is required" unless args.first
     Opsicle::MoveEip.new(args.first).execute global_options.merge options
@@ -226,7 +224,6 @@ end
 desc "Add tags to existing instances in the given environment stack"
 arg_name '<environment>'
 command 'add-tags' do |c|
-  c.switch [:d, :'with-defaults'], desc: "Add tags to existing instances", default_value: false
   c.action do |global_options, options, args|
     raise ArgumentError, "Environment is required" unless args.first
     Opsicle::AddTags.new(args.first).execute global_options.merge options
