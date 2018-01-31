@@ -36,6 +36,10 @@ module Opsicle
       env_config
     end
 
+    def mfa_required
+      return opsworks_config[:mfa_required] || $use_mfa
+    end
+
     def get_mfa_token
       return @token if @token
       @token = Output.ask("Enter MFA token: "){ |q|  q.validate = /^\d{6}$/ }
@@ -81,9 +85,9 @@ module Opsicle
 
       iam = Aws::IAM::Client.new
 
-       # this will be an array of 0 or 1 because iam.list_mfa_devices.mfa_devices will only return 0 or 1 device per user;
-       # if user doesn't have MFA enabled, then this loop won't even execute
-      if $use_mfa
+      # this will be an array of 0 or 1 because iam.list_mfa_devices.mfa_devices will only return 0 or 1 device per user;
+      # if user doesn't have MFA enabled, then this loop won't even execute
+      if mfa_required
         iam.list_mfa_devices.mfa_devices.each do |mfadevice|
           mfa_serial_number = mfadevice.serial_number
           get_mfa_token
@@ -112,6 +116,5 @@ module Opsicle
 
     MissingConfig = Class.new(StandardError)
     MissingEnvironment = Class.new(StandardError)
-
   end
 end
