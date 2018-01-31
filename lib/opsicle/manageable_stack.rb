@@ -1,5 +1,5 @@
 module Opsicle
-  class CloneableStack
+  class ManageableStack
     attr_accessor :id, :opsworks, :stack, :vpc_id
 
     def initialize(stack_id, opsworks)

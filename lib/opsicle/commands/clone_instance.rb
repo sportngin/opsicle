@@ -1,8 +1,8 @@
 require 'gli'
 require "opsicle/user_profile"
-require "opsicle/cloneable_layer"
-require "opsicle/cloneable_instance"
-require "opsicle/cloneable_stack"
+require "opsicle/manageable_layer"
+require "opsicle/manageable_instance"
+require "opsicle/manageable_stack"
 
 module Opsicle
   class CloneInstance
@@ -12,7 +12,7 @@ module Opsicle
       @opsworks = @client.opsworks
       @ec2 = @client.ec2
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = CloneableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
+      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
     end
 
@@ -40,7 +40,7 @@ module Opsicle
 
       layers = []
       ops_layers.each do |layer|
-        layers << CloneableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
+        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
       end
 
       layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}"}
