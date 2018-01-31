@@ -43,7 +43,7 @@ module Opsicle
     end
 
     def ask_which_target_instance(moveable_eip)
-      puts ""
+      puts "\nHere are all of the instances in the current instance's layer:"
       instances = @opsworks.describe_instances(layer_id: moveable_eip[:layer_id]).instances
       instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
       instance_index = @cli.ask("What is your target instance?\n", Integer) { |q| q.in = 1..instances.length.to_i } - 1
