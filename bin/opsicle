@@ -213,7 +213,7 @@ command 'create-instance' do |c|
   end
 end
 
-desc "Create an instance in the given environment stack"
+desc "Move EIPs between instances"
 arg_name '<environment>'
 command 'move-eip' do |c|
   c.switch [:d, :'with-defaults'], desc: "Create the instances with no overrides", default_value: false
