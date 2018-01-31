@@ -155,7 +155,7 @@ module Opsicle
           agents = @opsworks.describe_agent_versions(stack_id: self.stack_id).agent_versions
           version_ids = agents.collect { |i| i.version }.uniq
           agent_version = ask_for_possible_options(version_ids, "agent version")
-    
+
           self.layer.agent_version = agent_version   # only set agent version for whole layer if they override
         else
           agent_version = self.agent_version
@@ -189,7 +189,7 @@ module Opsicle
           subnets = subnets.sort
           subnet_id = ask_for_possible_options(subnets, "subnet ID")
           subnet_id = subnet_id.scan(/(subnet-[a-z0-9]*)/).first.first if subnet_id
-         
+          
           self.layer.subnet_id = subnet_id   # only set the subnet ID for whole layer if they override it
         else
           subnet_id = self.subnet_id
