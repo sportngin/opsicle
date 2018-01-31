@@ -285,7 +285,7 @@ module Opsicle
     end
 
     def ask_to_add_tags
-      ans = @cli.ask("Do you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer)
+      ans = @cli.ask("\nDo you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer)
       ans == 1
     end
 

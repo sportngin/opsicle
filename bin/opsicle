@@ -242,7 +242,6 @@ command :instances do |c|
   end
 end
 
-
 desc "Update properties on a OpsWorks resource."
 arg_name '<environment> <type>'
 command 'update' do |c|
