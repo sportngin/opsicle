@@ -62,5 +62,13 @@ module Opsicle
       target_instance_id = ask_which_target_instance(moveable_eip)
       transfer_eip(moveable_eip, target_instance_id)
     end
+
+    def instances
+      @opsworks.describe_instances(stack_id: self.id).instances
+    end
+
+    def deleteable_instances
+      instances.select{|instance| instance.auto_scaling_type.nil?  && instance.status == "stopped"}
+    end
   end
 end

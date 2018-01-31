@@ -212,6 +212,15 @@ command 'create-instance' do |c|
   end
 end
 
+desc "Delete stopped instances in the given environment stack"
+arg_name '<environment>'
+command 'delete-instance' do |c|
+  c.action do |global_options, options, args|
+    raise ArgumentError, "Environment is required" unless args.first
+    Opsicle::DeleteInstance.new(args.first).execute global_options.merge options
+  end
+end
+
 desc "Move EIPs between instances"
 arg_name '<environment>'
 command 'move-eip' do |c|
