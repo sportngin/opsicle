@@ -260,6 +260,8 @@ module Opsicle
     end
 
     def add_tags
+      raise ArgumentError, 'The instance must be running to add tags' unless @status == "online"
+
       if ask_to_add_tags
         tags = []
 

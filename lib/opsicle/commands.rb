@@ -1,5 +1,6 @@
 require 'opsicle/client'
 
+require "opsicle/commands/add_tags"
 require "opsicle/commands/deploy"
 require "opsicle/commands/chef_update"
 require "opsicle/commands/clone_instance"
