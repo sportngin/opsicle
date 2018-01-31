@@ -1,32 +1,6 @@
 module Opsicle
   class CreatableInstance
-    attr_accessor(
-      :hostname,
-      :status,
-      :layer,
-      :stack,
-      :ami_id,
-      :instance_type,
-      :instance_id,
-      :new_instance_id,
-      :agent_version,
-      :stack_id,
-      :layer_ids,
-      :auto_scaling_type,
-      :os,
-      :ssh_key_name,
-      :availability_zone,
-      :virtualization_type,
-      :subnet_id,
-      :architecture,
-      :root_device_type,
-      :install_updates_on_boot,
-      :ebs_optimized,
-      :tenancy,
-      :opsworks,
-      :ec2,
-      :cli
-    )
+    attr_accessor :layer, :stack, :new_instance_id, :opsworks, :ec2, :cli
 
     def initialize(layer, stack, opsworks, ec2, cli)
       self.layer = layer

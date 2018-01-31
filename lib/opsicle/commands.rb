@@ -17,5 +17,3 @@ require "opsicle/commands/ssh_clean_keys"
 require "opsicle/commands/ssh_key"
 require "opsicle/commands/update"
 require "opsicle/commands/user_profile_info"
-
-
