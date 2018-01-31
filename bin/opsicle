@@ -203,6 +203,17 @@ command 'clone-instance' do |c|
   end
 end
 
+
+desc "Create an instance in the given environment stack"
+arg_name '<environment>'
+command 'create-instance' do |c|
+  c.switch [:d, :'with-defaults'], desc: "Create the instances with no overrides", default_value: false
+  c.action do |global_options, options, args|
+    raise ArgumentError, "Environment is required" unless args.first
+    Opsicle::CreateInstance.new(args.first).execute global_options.merge options
+  end
+end
+
 desc "List all instances in the given environment stack"
 arg_name '<environment>'
 command :instances do |c|
