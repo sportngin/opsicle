@@ -20,5 +20,13 @@ module Opsicle
     def deleteable_instances
       instances.select{|instance| instance.auto_scaling_type.nil?  && instance.status == "stopped"}
     end
+
+    def stoppable_states
+      %w(start_failed stop_failed online running_setup setup_failed booting rebooting)
+    end
+
+    def stoppable_instances
+      instances.select{|instance| instance.elastic_ip.nil?  && stoppable_states.include?(instance.status)}
+    end
   end
 end
