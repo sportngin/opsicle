@@ -1,3 +1,8 @@
+#### v2.10.1
+* Ask layer before stopping/deleting instances; know which file creatable instance is in
+
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/138
+
 #### v2.10.0
 * Rename cloneable things to manageable things
 
