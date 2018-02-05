@@ -3,9 +3,7 @@ require "opsicle/user_profile"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
-require "opsicle/creatable_instance"
 require "opsicle/aws_instance_manager_helper"
-# require "opsicle/aws_manageable_instance"
 
 module Opsicle
   class MoveEip
