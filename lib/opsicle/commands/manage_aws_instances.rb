@@ -3,6 +3,7 @@ require "opsicle/user_profile"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
+require "opsicle/creatable_instance"
 
 module Opsicle
   class CloneInstance
@@ -16,7 +17,7 @@ module Opsicle
       @cli = HighLine.new
     end
 
-    def execute(options={})
+    def execute_clone_instance(options={})
       puts "Stack ID = #{@stack.id}"
       layer = select_layer
       all_instances = layer.get_cloneable_instances
@@ -26,12 +27,58 @@ module Opsicle
       layer.agent_version = nil
     end
 
+    def execute_create_instance(options={})
+      puts "Stack ID = #{@stack.id}"
+      layer = select_layer
+      layer.get_cloneable_instances
+      create_instance(layer, options)
+      layer.ami_id = nil
+      layer.agent_version = nil
+    end
+
+    def execute_stop_instance(options={})
+      puts "Stack ID = #{@stack.id}"
+      layer = select_layer
+      instances_to_stop = select_instances(layer)
+      instances_to_stop.each do |instance|
+        begin
+          @opsworks.stop_instance(instance_id: instance.instance_id)
+          puts "Stopping instance #{instance.hostname}..."
+        rescue
+          puts "Failed to stop #{instance.hostname}"
+        end
+      end
+    end
+
+    def execute_delete_instance(options={})
+      puts "Stack ID = #{@stack.id}"
+      layer = select_layer
+      instances_to_delete = select_instances(layer)
+      instances_to_delete.each do |instance|
+        begin
+          @opsworks.delete_instance(instance_id: instance.instance_id)
+          puts "Successfully deleted #{instance.hostname}"
+        rescue
+          puts "Failed to delete #{instance.hostname}"
+        end
+      end
+    end
+
+    def execute_move_eip(options={})
+      puts "Stack ID = #{@stack.id}"
+      @stack.move_eip
+    end
+
     def clone_instances(instances, options)
       if options[:'with-defaults']
         instances.each { |instance| instance.clone_with_defaults(options) }
       else
         instances.each { |instance| instance.clone(options) }
       end
+    end
+
+    def create_instance(layer, options)
+      CreatableInstance.new(layer, @stack, @opsworks, @ec2, @cli).create(options)
     end
 
     # def select_layer
