@@ -60,18 +60,6 @@ module Opsicle
       @opsworks.describe_instances(instance_ids: [instance_id]).instances.first.status
     end
 
-    # def gather_hostname
-    #   if self.hostname.empty?
-    #     self.layer.instances.first.hostname if self.layer.instances.first
-    #   end
-    # end
-
-    # def gather_os
-    #   if self.os.empty?
-    #     self.layer.instances.first.os if self.layer.instances.first
-    #   end
-    # end
-
     def add_tags(tags)
       ec2_instance_id = @opsworks.describe_instances(instance_ids: [instance_id]).instances.first.ec2_instance_id
       @ec2.create_tags(resources: [ ec2_instance_id ], tags: tags)

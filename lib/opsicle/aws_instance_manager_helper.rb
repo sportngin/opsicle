@@ -1,5 +1,10 @@
 module Opsicle
   module AwsInstanceManagerHelper
+
+    ############################
+    ### For generic managing ###
+    ############################
+
     def select_layer
       puts "\nLayers:\n"
       ops_layers = @opsworks.describe_layers({ :stack_id => @stack.id }).layers
@@ -27,6 +32,10 @@ module Opsicle
       end
       return_array
     end
+
+    ##############################################
+    ### For deleting and/or stopping instances ###
+    ##############################################
 
     def select_deletable_or_stoppable_instances(layer, stop_or_delete)
       if stop_or_delete == :stop
@@ -74,6 +83,10 @@ module Opsicle
         end
       end
     end
+
+    ##################################################
+    ### For gathering information on new instances ###
+    ##################################################
 
     def make_new_hostname(instance, options={})
       new_instance_hostname = auto_generated_hostname(instance, options) || nil
@@ -223,24 +236,9 @@ module Opsicle
       instance_type
     end
 
-    def ask_for_possible_options(arr, description)
-      arr.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
-      id_index = @cli.ask("Which #{description}?\n", Integer) { |q| q.in = 1..arr.length.to_i } - 1
-      arr[id_index]
-    end
-
-    def ask_for_new_option(description)
-      @cli.ask("Please write in the new #{description} and press ENTER:")
-    end
-
-    def ask_for_overriding_permission(description, overriding_all)
-      if overriding_all
-        ans = @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all of the following instances you're cloning.\n1) Yes\n2) No", Integer)
-      else
-        ans = @cli.ask("Do you wish to override this #{description}?\n1) Yes\n2) No", Integer)
-      end
-      ans == 1
-    end
+    #########################################
+    ### Creating new instances and clones ###
+    #########################################
 
     def create_new_clone(original_instance, new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
       new_instance = @opsworks.create_instance({
@@ -297,6 +295,47 @@ module Opsicle
       end
     end
 
+    #####################################
+    ### For asking the user questions ###
+    #####################################
+
+    def ask_for_possible_options(arr, description)
+      arr.each_with_index { |id, index| puts "#{index.to_i + 1}) #{id}"}
+      id_index = @cli.ask("Which #{description}?\n", Integer) { |q| q.in = 1..arr.length.to_i } - 1
+      arr[id_index]
+    end
+
+    def ask_for_new_option(description)
+      @cli.ask("Please write in the new #{description} and press ENTER:")
+    end
+
+    def ask_for_overriding_permission(description, overriding_all)
+      if overriding_all
+        ans = @cli.ask("Do you wish to override this #{description}? By overriding, you are choosing to override the current #{description} for all of the following instances you're cloning.\n1) Yes\n2) No", Integer)
+      else
+        ans = @cli.ask("Do you wish to override this #{description}?\n1) Yes\n2) No", Integer)
+      end
+      ans == 1
+    end
+
+    def tag_count
+      @cli.ask("How many tags do you wish to add? Please write in the number as an integer and press ENTER:").to_i
+    end
+
+    def ask_to_add_tags
+      ans = @cli.ask("\nDo you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer)
+      ans == 1
+    end
+
+    def ask_to_start_instance
+      ans = @cli.ask("Do you wish to start this new instance?\n1) Yes\n2) No", Integer)
+      ans == 1
+    end
+
+    ################################################
+    ### To help us add tags to running instances ###
+    ################################################
+
     def define_tag
       tag_key = ask_for_new_option('tag name')
       tag_value = ask_for_new_option('tag value')
@@ -317,19 +356,9 @@ module Opsicle
       end
     end
 
-    def tag_count
-      @cli.ask("How many tags do you wish to add? Please write in the number as an integer and press ENTER:").to_i
-    end
-
-    def ask_to_add_tags
-      ans = @cli.ask("\nDo you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer)
-      ans == 1
-    end
-
-    def ask_to_start_instance
-      ans = @cli.ask("Do you wish to start this new instance?\n1) Yes\n2) No", Integer)
-      ans == 1
-    end
+    ###################################
+    ### To help us move EIPs around ###
+    ###################################
 
     def gather_eip_information
       eip_information = []
