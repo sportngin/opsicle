@@ -18,7 +18,8 @@ module Opsicle
 
     def execute(options={})
       puts "Stack ID = #{@stack.id}"
-      instances_to_stop = select_instances
+      layer = select_layer
+      instances_to_stop = select_instances(layer)
       instances_to_stop.each do |instance|
         begin
           @opsworks.stop_instance(instance_id: instance.instance_id)
@@ -29,15 +30,29 @@ module Opsicle
       end
     end
 
-    def stoppable_instances
-      @stack.stoppable_instances
+    def stoppable_instances(layer)
+      @stack.stoppable_instances(layer)
     end
 
-    def select_instances
-      instances = stoppable_instances
+    def select_layer
+      puts "\nLayers:\n"
+      ops_layers = @opsworks.describe_layers({ :stack_id => @stack.id }).layers
+
+      layers = []
+      ops_layers.each do |layer|
+        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
+      end
+
+      layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
+      layer_index = @cli.ask("Layer?\n", Integer) { |q| q.in = 1..layers.length.to_i } - 1
+      layers[layer_index]
+    end
+
+    def select_instances(layer)
+      instances = stoppable_instances(layer)
       return_array = []
       if instances.empty?
-        puts "There are no stoppable instances"
+        puts "There are no stoppable instances."
       else
         puts "\nStoppable Instances:\n"
         instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }

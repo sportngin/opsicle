@@ -30,14 +30,14 @@ module Opsicle
     end
 
     def make_new_hostname
-      new_instance_hostname = auto_generated_hostname
-      puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
+      new_instance_hostname = auto_generated_hostname || nil
+      puts "\nAutomatically generated hostname: #{new_instance_hostname}\n" if new_instance_hostname
       new_instance_hostname = ask_for_new_option("instance's hostname") if ask_for_overriding_permission("hostname", false)
       new_instance_hostname
     end
 
     def hostname
-      self.layer.instances.first.hostname
+      self.layer.instances.first.hostname if self.layer.instances.first
     end
 
     def auto_generated_hostname
@@ -118,7 +118,7 @@ module Opsicle
     end
 
     def os
-      self.layer.instances.first.os
+      self.layer.instances.first.os if self.layer.instances.first
     end
 
     def ask_for_possible_options(arr, description)
@@ -149,7 +149,7 @@ module Opsicle
         ami_id: ami_id,
         subnet_id: subnet_id,
         agent_version: agent_version,
-        os: os
+        os: os || 'Custom'
       })
       self.new_instance_id = new_instance.instance_id
       self.layer.add_new_instance(new_instance_id)
