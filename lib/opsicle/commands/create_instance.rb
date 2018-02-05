@@ -1,8 +1,8 @@
 require 'gli'
 require "opsicle/user_profile"
 require "opsicle/manageable_layer"
-require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
+require "opsicle/creatable_instance"
 
 module Opsicle
   class CreateInstance
