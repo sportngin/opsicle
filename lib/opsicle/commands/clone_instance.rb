@@ -3,9 +3,11 @@ require "opsicle/user_profile"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
+require "opsicle/aws_instance_manager_helper"
 
 module Opsicle
   class CloneInstance
+    include Opsicle::AwsInstanceManagerHelper
 
     def initialize(environment)
       @client = Client.new(environment)
@@ -14,52 +16,49 @@ module Opsicle
       stack_id = @client.config.opsworks_config[:stack_id]
       @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
+
+      puts "Stack ID = #{@stack.id}"
     end
 
     def execute(options={})
-      puts "Stack ID = #{@stack.id}"
-      layer = select_layer
-      all_instances = layer.get_cloneable_instances
-      instance_to_clone = select_instances(all_instances)
-      clone_instances(instance_to_clone, options)
-      layer.ami_id = nil
-      layer.agent_version = nil
-    end
+      @layer = select_layer
+      all_instances = @layer.get_cloneable_instances
+      instances = select_instances(all_instances)
 
-    def clone_instances(instances, options)
       if options[:'with-defaults']
-        instances.each { |instance| instance.clone_with_defaults(options) }
+        instances.each { |instance| clone_with_defaults(instance) }
       else
-        instances.each { |instance| instance.clone(options) }
+        instances.each { |instance| clone(instance) }
       end
+
+      @layer.ami_id = nil
+      @layer.agent_version = nil
     end
 
-    def select_layer
-      puts "\nLayers:\n"
-      ops_layers = @opsworks.describe_layers({ :stack_id => @stack.id }).layers
+    def clone(instance)
+      puts "\nCloning an instance..."
+      new_instance_hostname = make_new_hostname(instance)
+      ami_id = verify_ami_id(instance)
+      agent_version = verify_agent_version(instance)
+      subnet_id = verify_subnet_id(instance)
+      instance_type = verify_instance_type(instance)
 
-      layers = []
-      ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
-      end
-
-      layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
-      layer_index = @cli.ask("Layer?\n", Integer) { |q| q.in = 1..layers.length.to_i } - 1
-      layers[layer_index]
+      new_manageable_instance = create_new_clone(instance, new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
+      start_new_instance(new_manageable_instance)
     end
 
-    def select_instances(instances)
-      puts "\nInstances:\n"
-      instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
-      instance_indices_string = @cli.ask("Instances? (enter as a comma separated list)\n", String)
-      instance_indices_list = instance_indices_string.split(/,\s*/)
-      instance_indices_list.map! { |instance_index| instance_index.to_i - 1 }
+    def clone_with_defaults(instance)
+      puts "\nCloning an instance..."
+      new_hostname = auto_generated_hostname(instance)
+      instance_type = instance.instance_type
+      ami_id = instance.ami_id
+      agent_version = instance.agent_version
+      subnet_id = instance.subnet_id
 
-      return_array = []
-      instance_indices_list.each do |index|
-        return_array << instances[index]
-      end
-      return_array
+      new_manageable_instance = create_new_clone(instance, new_hostname, instance_type, ami_id, agent_version, subnet_id)
+      @opsworks.start_instance(instance_id: new_manageable_instance.instance_id)
+      puts "\nNew instance is starting…"
+      add_tags(new_manageable_instance)
     end
   end
 end

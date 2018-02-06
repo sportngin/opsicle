@@ -1,11 +1,13 @@
 require 'gli'
 require "opsicle/user_profile"
 require "opsicle/manageable_layer"
+require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
-require "opsicle/creatable_instance"
+require "opsicle/aws_instance_manager_helper"
 
 module Opsicle
   class CreateInstance
+    include Opsicle::AwsInstanceManagerHelper
 
     def initialize(environment)
       @client = Client.new(environment)
@@ -14,33 +16,36 @@ module Opsicle
       stack_id = @client.config.opsworks_config[:stack_id]
       @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
+
+      puts "Stack ID = #{@stack.id}"
     end
 
     def execute(options={})
-      puts "Stack ID = #{@stack.id}"
-      layer = select_layer
-      layer.get_cloneable_instances
-      create_instance(layer, options)
-      layer.ami_id = nil
-      layer.agent_version = nil
+      @layer = select_layer
+      @layer.get_cloneable_instances
+      new_manageable_instance = ManageableInstance.new(@layer, @stack, @opsworks, @ec2)
+      create(new_manageable_instance)
+      @layer.ami_id = nil
+      @layer.agent_version = nil
     end
 
-    def create_instance(layer, options)
-      CreatableInstance.new(layer, @stack, @opsworks, @ec2, @cli).create(options)
-    end
+    def create(instance)
+      puts "\nCreating an instance..."
+      options = { create_fresh: true }
 
-    def select_layer
-      puts "\nLayers:\n"
-      ops_layers = @opsworks.describe_layers({ :stack_id => @stack.id }).layers
+      new_instance_hostname = make_new_hostname(instance, options)
+      puts ""
+      ami_id = verify_ami_id(instance, options)
+      puts ""
+      agent_version = verify_agent_version(instance, options)
+      puts ""
+      subnet_id = verify_subnet_id(instance, options)
+      puts ""
+      instance_type = ask_for_new_option('instance type')
+      puts ""
 
-      layers = []
-      ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
-      end
-
-      layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
-      layer_index = @cli.ask("Layer?\n", Integer) { |q| q.in = 1..layers.length.to_i } - 1
-      layers[layer_index]
+      new_manageable_instance = create_new_instance(instance, new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
+      start_new_instance(new_manageable_instance)
     end
   end
 end

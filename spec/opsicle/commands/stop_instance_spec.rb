@@ -5,7 +5,7 @@ require "opsicle/user_profile"
 require "opsicle/aws_instance_manager_helper"
 
 module Opsicle
-  describe DeleteInstance do
+  describe StopInstance do
     include Opsicle::AwsInstanceManagerHelper
 
     before do
@@ -17,7 +17,7 @@ module Opsicle
                                        :availability_zone => 'availability_zone', :virtualization_type => 'virtualization_type',
                                        :subnet_id => 'subnet_id', :architecture => 'architecture',
                                        :root_device_type => 'root_device_type', :install_updates_on_boot => 'install_updates_on_boot',
-                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id')
+                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id', :elastic_ip => nil)
       @instance2 = double('instance2', :hostname => 'example-hostname-02', :status => 'active',
                                        :ami_id => 'ami_id', :instance_type => 'instance_type',
                                        :agent_version => 'agent_version', :stack_id => 1234567890,
@@ -26,12 +26,12 @@ module Opsicle
                                        :availability_zone => 'availability_zone', :virtualization_type => 'virtualization_type',
                                        :subnet_id => 'subnet_id', :architecture => 'architecture',
                                        :root_device_type => 'root_device_type', :install_updates_on_boot => 'install_updates_on_boot',
-                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id')
+                                       :ebs_optimized => 'ebs_optimized', :tenancy => 'tenancy', :instance_id => 'some-id', :elastic_ip => nil)
       @instances = double('instances', :instances => [@instance1, @instance2])
       @layer1 = double('layer1', :name => 'layer-1', :layer_id => 12345, :instances => [@instance1, @instance2])
       @layer2 = double('layer2', :name => 'layer-2', :layer_id => 67890, :instances => [@instance1, @instance2])
       @layers = double('layers', :layers => [@layer1, @layer2])
-      @stack = double('stack', :vpc_id => "vpc-123456", :deletable_instances => [])
+      @stack = double('stack', :vpc_id => "vpc-123456", :stoppable_instances => [])
       @stacks = double('stacks', :stacks => [@stack])
       @opsworks = double('opsworks', :describe_instances => @instances, :describe_layers => @layers,
                                      :create_instance => @new_instance, :describe_stacks => @stacks,
@@ -48,33 +48,33 @@ module Opsicle
     context "#execute" do
       it "lists all current layers" do
         expect(@opsworks).to receive(:describe_layers)
-        DeleteInstance.new(:environment).execute
+        StopInstance.new(:environment).execute
       end
 
       context "#select_deletable_or_stoppable_instances" do
-        it "should ask the stack for all deletable instances" do
-          expect(@stack).to receive(:deletable_instances)
-          select_deletable_or_stoppable_instances(@layer, :delete)
+        it "should ask the stack for all stoppable instances" do
+          expect(@stack).to receive(:stoppable_instances)
+          select_deletable_or_stoppable_instances(@layer, :stop)
         end
 
         it "should return an empty array" do
-          allow(@stack).to receive(:deletable_instances).and_return([])
-          result = select_deletable_or_stoppable_instances(@layer, :delete)
+          allow(@stack).to receive(:stoppable_instances).and_return([])
+          result = select_deletable_or_stoppable_instances(@layer, :stop)
           expect(result).to eq([])
         end
 
         it "should return an array of 1" do
           allow(@cli).to receive(:ask).and_return("1")
-          allow(@stack).to receive(:deletable_instances).and_return([@instance1])
-          result = select_deletable_or_stoppable_instances(@layer, :delete)
+          allow(@stack).to receive(:stoppable_instances).and_return([@instance1])
+          result = select_deletable_or_stoppable_instances(@layer, :stop)
           expect(result).to eq([@instance1])
         end
       end
 
       context "#stop_or_delete" do
         it "should stop or delete" do
-          expect(@opsworks).to receive(:delete_instance).and_return(true)
-          stop_or_delete([@instance1], :delete)
+          expect(@opsworks).to receive(:stop_instance).and_return(true)
+          stop_or_delete([@instance1], :stop)
         end
       end
     end

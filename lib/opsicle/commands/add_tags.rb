@@ -3,9 +3,11 @@ require "opsicle/user_profile"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
+require "opsicle/aws_instance_manager_helper"
 
 module Opsicle
   class AddTags
+    include Opsicle::AwsInstanceManagerHelper
 
     def initialize(environment)
       @client = Client.new(environment)
@@ -14,46 +16,15 @@ module Opsicle
       stack_id = @client.config.opsworks_config[:stack_id]
       @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
+
+      puts "Stack ID = #{@stack.id}"
     end
 
     def execute(options={})
-      puts "Stack ID = #{@stack.id}"
-      layer = select_layer
-      all_instances = layer.get_cloneable_instances
+      @layer = select_layer
+      all_instances = @layer.get_cloneable_instances
       instances_to_add_tags = select_instances(all_instances)
-      add_tags_to_instances(instances_to_add_tags)
-    end
-
-    def add_tags_to_instances(instances)
-      instances.each { |instance| instance.add_tags({add_tags_mode: true}) }
-    end
-
-    def select_layer
-      puts "\nLayers:\n"
-      ops_layers = @opsworks.describe_layers({ :stack_id => @stack.id }).layers
-
-      layers = []
-      ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
-      end
-
-      layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
-      layer_index = @cli.ask("Layer?\n", Integer) { |q| q.in = 1..layers.length.to_i } - 1
-      layers[layer_index]
-    end
-
-    def select_instances(instances)
-      puts "\nInstances:\n"
-      instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
-      instance_indices_string = @cli.ask("Instances? (enter as a comma separated list)\n", String)
-      instance_indices_list = instance_indices_string.split(/,\s*/)
-      instance_indices_list.map! { |instance_index| instance_index.to_i - 1 }
-
-      return_array = []
-      instance_indices_list.each do |index|
-        return_array << instances[index]
-      end
-      return_array
+      instances_to_add_tags.each { |instance| add_tags(instance, { add_tags_mode: true }) }
     end
   end
 end
