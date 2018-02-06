@@ -21,10 +21,6 @@ module Opsicle
     end
 
     def execute(options={})
-      move_eip
-    end
-
-    def move_eip
       @stack.get_eips
       eip_information = gather_eip_information
       moveable_eip = ask_which_eip_to_move(eip_information)

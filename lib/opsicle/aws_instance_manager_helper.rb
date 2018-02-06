@@ -94,7 +94,7 @@ module Opsicle
     def make_new_hostname(instance, options={})
       new_instance_hostname = auto_generated_hostname(instance, options) || nil
 
-      if new_instance_hostname.empty?
+      if new_instance_hostname.nil? || new_instance_hostname.empty?
         rewriting = true
       else
         puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
