@@ -9,6 +9,8 @@ module Opsicle
   class DeleteInstance
     include Opsicle::AwsInstanceManagerHelper
 
+    ACTION_VARIABLE = :delete
+
     def initialize(environment)
       @client = Client.new(environment)
       @opsworks = @client.opsworks
@@ -21,9 +23,9 @@ module Opsicle
     end
 
     def execute(options={})
-      layer = select_layer
-      instances = select_deletable_or_stoppable_instances(layer, :delete)
-      stop_or_delete(instances, :delete)
+      @layer = select_layer
+      instances = select_deletable_or_stoppable_instances(@layer, ACTION_VARIABLE)
+      stop_or_delete(instances, ACTION_VARIABLE)
     end
   end
 end

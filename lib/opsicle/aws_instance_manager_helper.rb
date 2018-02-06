@@ -1,6 +1,9 @@
 module Opsicle
   module AwsInstanceManagerHelper
 
+    ACTION_VARIABLE_STOP = :stop
+    ACTION_VARIABLE_DELETE = :delete
+
     ############################
     ### For generic managing ###
     ############################
@@ -38,14 +41,14 @@ module Opsicle
     ##############################################
 
     def select_deletable_or_stoppable_instances(layer, stop_or_delete)
-      if stop_or_delete == :stop
+      if stop_or_delete == ACTION_VARIABLE_STOP
         instances = @stack.stoppable_instances(layer)
         specific_words = { adjective: "stoppable", verb: "stop" }
-      elsif stop_or_delete == :delete
+      elsif stop_or_delete == ACTION_VARIABLE_DELETE
         instances = @stack.deletable_instances(layer)
         specific_words = { adjective: "deletable", verb: "delete" } 
       end
-      
+
       return_array = []
       if instances.empty?
         puts "There are no #{specific_words[:adjective]} instances."
@@ -63,17 +66,17 @@ module Opsicle
     end
 
     def stop_or_delete(instances, stop_or_delete)
-      if stop_or_delete == :stop
+      if stop_or_delete == ACTION_VARIABLE_STOP
         specific_words = { past_tense: "stopped", verb: "stop" }
-      elsif stop_or_delete == :delete
+      elsif stop_or_delete == ACTION_VARIABLE_DELETE
         specific_words = { past_tense: "deleted", verb: "delete" } 
       end
 
       instances.each do |instance|
         begin
-          if stop_or_delete == :stop
+          if stop_or_delete == ACTION_VARIABLE_STOP
             @opsworks.stop_instance(instance_id: instance.instance_id)
-          elsif stop_or_delete == :delete
+          elsif stop_or_delete == ACTION_VARIABLE_DELETE
             @opsworks.delete_instance(instance_id: instance.instance_id)
           end
           
@@ -90,9 +93,15 @@ module Opsicle
 
     def make_new_hostname(instance, options={})
       new_instance_hostname = auto_generated_hostname(instance, options) || nil
-      puts "\nAutomatically generated hostname: #{new_instance_hostname}\n" unless new_instance_hostname.empty?
-      new_instance_hostname = ask_for_new_option("instance's hostname") if ask_for_overriding_permission("hostname", false)
-      new_instance_hostname
+
+      if new_instance_hostname.empty?
+        rewriting = true
+      else
+        puts "\nAutomatically generated hostname: #{new_instance_hostname}\n"
+        rewriting = ask_for_overriding_permission("hostname", false)
+      end
+
+      rewriting ? ask_for_new_option("instance's hostname") : new_instance_hostname
     end
 
     def auto_generated_hostname(instance, options={})
@@ -127,12 +136,8 @@ module Opsicle
           ami_id = @layer.ami_id
         else
           puts "\nCurrent AMI id is #{instance.ami_id}"
-
-          if ask_for_overriding_permission("AMI ID", true)
-            ami_id = select_ami_id
-          else
-            ami_id = instance.ami_id
-          end
+          rewriting = ask_for_overriding_permission("AMI ID", true)
+          ami_id = rewriting ? select_ami_id : instance.ami_id
         end
       end
 
@@ -160,12 +165,8 @@ module Opsicle
           agent_version = @layer.agent_version
         else
           puts "\nCurrent agent version is #{instance.agent_version}"
-
-          if ask_for_overriding_permission("agent version", true)
-            agent_version = select_agent_version
-          else
-            agent_version = instance.agent_version
-          end
+          rewriting = ask_for_overriding_permission("agent version", true)
+          agent_version = rewriting ? select_agent_version : instance.agent_version
         end
       end
 
@@ -189,12 +190,8 @@ module Opsicle
           current_subnet = Aws::EC2::Subnet.new(id: instance.subnet_id)
           subnet_name = find_subnet_name(current_subnet)
           puts "\nCurrent subnet ID is \"#{subnet_name}\" #{current_subnet.availability_zone} (#{instance.subnet_id})"
-
-          if ask_for_overriding_permission("subnet ID", true)
-            subnet_id = select_subnet_id
-          else
-            subnet_id = instance.subnet_id
-          end
+          rewriting = ask_for_overriding_permission("subnet ID", true)
+          subnet_id = rewriting ? select_subnet_id : instance.subnet_id
         end
       end
 

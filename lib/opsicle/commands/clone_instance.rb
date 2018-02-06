@@ -49,11 +49,16 @@ module Opsicle
 
     def clone_with_defaults(instance)
       puts "\nCloning an instance..."
-      new_hostname = auto_generated_hostname
+      new_hostname = auto_generated_hostname(instance)
+      instance_type = instance.instance_type
+      ami_id = instance.ami_id
+      agent_version = instance.agent_version
+      subnet_id = instance.subnet_id
+
       new_manageable_instance = create_new_clone(instance, new_hostname, instance_type, ami_id, agent_version, subnet_id)
-      @opsworks.start_instance(instance_id: new_manageable_instance)
-      add_tags
+      @opsworks.start_instance(instance_id: new_manageable_instance.instance_id)
       puts "\nNew instance is starting…"
+      add_tags(new_manageable_instance)
     end
   end
 end

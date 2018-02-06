@@ -23,6 +23,7 @@ module Opsicle
       tag1 = { key: "tag_example1", value: "tag_value1" }
       tag2 = { key: "tag_example2", value: "tag_value2" }
       @tags = [tag1, tag2]
+      @manageable_instance = ManageableInstance.new(@layer, @stack, @opsworks, @ec2, @instance)
       # allow(@layer).to receive(:ami_id=)
       # allow(@layer).to receive(:ami_id)
       # allow(@layer).to receive(:agent_version=)
@@ -52,31 +53,27 @@ module Opsicle
 
     context "#add_tags" do
       it "should call create_tags for the ec2 client" do
-        manageable_instance = ManageableInstance.new(@layer, @stack, @opsworks, @ec2, @instance)
         allow(@opsworks).to receive(:describe_instances).and_return(@instances)
         expect(@ec2).to receive(:create_tags)
-        manageable_instance.add_tags(@tags)
+        @manageable_instance.add_tags(@tags)
       end
 
       it "should properly add tags to the instance" do
-        manageable_instance = ManageableInstance.new(@layer, @stack, @opsworks, @ec2, @instance)
-        result = manageable_instance.add_tags(@tags)
+        result = @manageable_instance.add_tags(@tags)
         expect(result).to eq(true)
       end
     end
 
     context "#status" do
       it "should gather the status of the instance" do
-        manageable_instance = ManageableInstance.new(@layer, @stack, @opsworks, @ec2, @instance)
         allow(@opsworks).to receive(:describe_instances).and_return(@instances)
-        status = manageable_instance.status
+        status = @manageable_instance.status
         expect(status).to eq("online")
       end
 
       it "should let @opsworks to gather teh status of the first instance" do
-        manageable_instance = ManageableInstance.new(@layer, @stack, @opsworks, @ec2, @instance)
         expect(@opsworks).to receive(:describe_instances)
-        manageable_instance.status
+        @manageable_instance.status
       end
     end
   end
