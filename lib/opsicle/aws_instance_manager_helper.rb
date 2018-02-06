@@ -42,7 +42,7 @@ module Opsicle
         instances = @stack.stoppable_instances(layer)
         specific_words = { adjective: "stoppable", verb: "stop" }
       elsif stop_or_delete == :delete
-        instances = @stack.deleteable_instances(layer)
+        instances = @stack.deletable_instances(layer)
         specific_words = { adjective: "deletable", verb: "delete" } 
       end
       

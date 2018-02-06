@@ -67,7 +67,7 @@ module Opsicle
     # context "#execute" do
     #   it "lists deleteable instances" do
     #     allow(subject).to receive("staging"){[@instance1]}
-    #     expect(@stack).to receive(:deleteable_instances)
+    #     expect(@stack).to receive(:deletable_instances)
     #     subject.execute
     #   end
     #

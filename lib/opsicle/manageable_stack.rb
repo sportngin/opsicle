@@ -27,8 +27,8 @@ module Opsicle
       @opsworks.describe_instances(stack_id: self.id).instances
     end
 
-    def deleteable_instances(layer)
-      instances.select{ |instance| instance.auto_scaling_type.nil?  && instance.status == "stopped" && instance.layer_ids.include?(layer.layer_id) }
+    def deletable_instances(layer)
+      instances.select{ |instance| instance.auto_scaling_type.nil? && instance.status == "stopped" && instance.layer_ids.include?(layer.layer_id) }
     end
 
     def stoppable_states
@@ -36,7 +36,7 @@ module Opsicle
     end
 
     def stoppable_instances(layer)
-      instances.select{ |instance| instance.elastic_ip.nil?  && stoppable_states.include?(instance.status) && instance.layer_ids.include?(layer.layer_id) }
+      instances.select{ |instance| instance.elastic_ip.nil? && stoppable_states.include?(instance.status) && instance.layer_ids.include?(layer.layer_id) }
     end
   end
 end

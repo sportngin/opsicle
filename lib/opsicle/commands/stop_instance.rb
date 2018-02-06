@@ -16,7 +16,6 @@ module Opsicle
       stack_id = @client.config.opsworks_config[:stack_id]
       @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
-      @new_instance_id = nil
 
       puts "Stack ID = #{@stack.id}"
     end
