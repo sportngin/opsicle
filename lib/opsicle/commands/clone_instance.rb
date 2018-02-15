@@ -1,5 +1,6 @@
 require 'gli'
 require "opsicle/user_profile"
+require "opsicle/opsworks"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
@@ -11,10 +12,10 @@ module Opsicle
 
     def initialize(environment)
       @client = Client.new(environment)
-      @opsworks = @client.opsworks
+      @opsworks = Opsworks.new(@client)
       @ec2 = @client.ec2
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
+      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks.client)
       @cli = HighLine.new
       puts "Stack ID = #{@stack.id}"
     end
@@ -50,9 +51,37 @@ module Opsicle
       puts "\nCloning an instance..."
       new_hostname = instance.auto_generated_hostname
       instance.create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
-      @opsworks.start_instance(instance_id: new_instance_id)
+      @opsworks.start_instance(instance.new_instance_id)
       puts "\nNew instance is starting…"
       instance.add_tags
+    end
+
+    def select_layer
+      puts "\nLayers:\n"
+      ops_layers = @opsworks.describe_layers(@stack.id)
+
+      layers = []
+      ops_layers.each do |layer|
+        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks.client, @ec2, @cli)
+      end
+
+      layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
+      layer_index = @cli.ask("Layer?\n", Integer) { |q| q.in = 1..layers.length.to_i } - 1
+      layers[layer_index]
+    end
+
+    def select_instances(instances)
+      puts "\nInstances:\n"
+      instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
+      instance_indices_string = @cli.ask("Instances? (enter as a comma separated list)\n", String)
+      instance_indices_list = instance_indices_string.split(/,\s*/)
+      instance_indices_list.map! { |instance_index| instance_index.to_i - 1 }
+
+      return_array = []
+      instance_indices_list.each do |index|
+        return_array << instances[index]
+      end
+      return_array
     end
   end
 end

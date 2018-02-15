@@ -1,4 +1,5 @@
 require 'opsicle/config'
+require 'opsicle/opsworks'
 
 module Opsicle
   class Client
