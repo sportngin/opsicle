@@ -13,11 +13,15 @@ module Opsicle
     # end
 
     def describe_layers(stack_id)
-      @client.describe_layers({ :stack_id => stack_id }).layers
+      @client.describe_layers(stack_id: stack_id).layers
     end
 
     def start_instance(instance_id)
       @client.start_instance(instance_id: instance_id)
     end
+
+    # def instance_type
+
+    # end
   end
 end

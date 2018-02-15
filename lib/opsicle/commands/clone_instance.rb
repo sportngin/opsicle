@@ -37,6 +37,7 @@ module Opsicle
 
     def clone(instance)
       puts "\nCloning an instance..."
+      
       new_instance_hostname = instance.make_new_hostname
       ami_id = instance.verify_ami_id
       agent_version = instance.verify_agent_version
@@ -49,10 +50,18 @@ module Opsicle
 
     def clone_with_defaults(instance)
       puts "\nCloning an instance..."
+
       new_hostname = instance.auto_generated_hostname
+      ami_id = instance.ami_id
+      agent_version = instance.agent_version
+      subnet_id = instance.subnet_id
+      instance_type = instance.instance_type
+
       instance.create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
       @opsworks.start_instance(instance.new_instance_id)
+
       puts "\nNew instance is starting…"
+
       instance.add_tags
     end
 
