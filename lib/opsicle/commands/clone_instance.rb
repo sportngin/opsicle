@@ -1,27 +1,25 @@
 require 'gli'
 require "opsicle/user_profile"
-require "opsicle/opsworks"
+require "opsicle/opsworks_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
-require "opsicle/aws_instance_manager_helper"
 
 module Opsicle
   class CloneInstance
-    include Opsicle::AwsInstanceManagerHelper
-
     def initialize(environment)
-      @client = Client.new(environment)
-      @opsworks = Opsworks.new(@client)
-      @ec2 = @client.ec2
       stack_id = @client.config.opsworks_config[:stack_id]
+      puts "Stack ID = #{stack_id}"
+
+      @client = Client.new(environment)
+      @opsworks = OpsworksAdapter.new(@client)
+      @ec2 = @client.ec2
       @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks.client)
       @cli = HighLine.new
-      puts "Stack ID = #{@stack.id}"
+      @layer = select_layer
     end
 
     def execute(options={})
-      @layer = select_layer
       all_instances = @layer.get_cloneable_instances
       instances = select_instances(all_instances)
       
@@ -67,7 +65,7 @@ module Opsicle
 
     def select_layer
       puts "\nLayers:\n"
-      ops_layers = @opsworks.describe_layers(@stack.id)
+      ops_layers = @opsworks.get_layers(@stack.id)
 
       layers = []
       ops_layers.each do |layer|
