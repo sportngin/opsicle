@@ -8,10 +8,10 @@ require "opsicle/manageable_stack"
 module Opsicle
   class CloneInstance
     def initialize(environment)
+      @client = Client.new(environment)
       stack_id = @client.config.opsworks_config[:stack_id]
       puts "Stack ID = #{stack_id}"
 
-      @client = Client.new(environment)
       @opsworks = OpsworksAdapter.new(@client)
       @ec2 = @client.ec2
       @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks.client)
@@ -24,43 +24,13 @@ module Opsicle
       instances = select_instances(all_instances)
       
       if options[:'with-defaults']
-        instances.each { |instance| clone_with_defaults(instance) }
+        instances.each { |instance| instance.clone_with_defaults(options) }
       else
-        instances.each { |instance| clone(instance) }
+        instances.each { |instance| instance.clone(options) }
       end
       
       @layer.ami_id = nil
       @layer.agent_version = nil
-    end
-
-    def clone(instance)
-      puts "\nCloning an instance..."
-      
-      new_instance_hostname = instance.make_new_hostname
-      ami_id = instance.verify_ami_id
-      agent_version = instance.verify_agent_version
-      subnet_id = instance.verify_subnet_id
-      instance_type = instance.verify_instance_type
-
-      instance.create_new_instance(new_instance_hostname, instance_type, ami_id, agent_version, subnet_id)
-      instance.start_new_instance
-    end
-
-    def clone_with_defaults(instance)
-      puts "\nCloning an instance..."
-
-      new_hostname = instance.auto_generated_hostname
-      ami_id = instance.ami_id
-      agent_version = instance.agent_version
-      subnet_id = instance.subnet_id
-      instance_type = instance.instance_type
-
-      instance.create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
-      @opsworks.start_instance(instance.new_instance_id)
-
-      puts "\nNew instance is starting…"
-
-      instance.add_tags
     end
 
     def select_layer
