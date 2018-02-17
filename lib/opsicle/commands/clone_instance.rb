@@ -7,39 +7,42 @@ require "opsicle/manageable_stack"
 
 module Opsicle
   class CloneInstance
+
     def initialize(environment)
       @client = Client.new(environment)
-      stack_id = @client.config.opsworks_config[:stack_id]
-      puts "Stack ID = #{stack_id}"
-
-      @opsworks = OpsworksAdapter.new(@client)
+      @opsworks_adapater = OpsworksAdapter.new(@client)
+      @opsworks = @opsworks_adapater.client
       @ec2 = @client.ec2
-      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks.client)
+      stack_id = @client.config.opsworks_config[:stack_id]
+      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
       @cli = HighLine.new
-      @layer = select_layer
     end
 
     def execute(options={})
-      all_instances = @layer.get_cloneable_instances
-      instances = select_instances(all_instances)
-      
+      puts "Stack ID = #{@stack.id}"
+      layer = select_layer
+      all_instances = layer.get_cloneable_instances
+      instance_to_clone = select_instances(all_instances)
+      clone_instances(instance_to_clone, options)
+      layer.ami_id = nil
+      layer.agent_version = nil
+    end
+
+    def clone_instances(instances, options)
       if options[:'with-defaults']
         instances.each { |instance| instance.clone_with_defaults(options) }
       else
         instances.each { |instance| instance.clone(options) }
       end
-      
-      @layer.ami_id = nil
-      @layer.agent_version = nil
     end
 
     def select_layer
       puts "\nLayers:\n"
-      ops_layers = @opsworks.get_layers(@stack.id)
+      ops_layers = @opsworks_adapater.get_layers(@stack.id)
 
       layers = []
       ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks.client, @ec2, @cli)
+        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
       end
 
       layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
