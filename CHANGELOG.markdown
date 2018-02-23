@@ -1,3 +1,8 @@
+#### v2.11.0
+* Make an opsworks adapter that calls an opsworks client
+
+  > Emma Sax, Vivek Bisen: Tony Song, Unknown User: https://github.com/sportngin/opsicle/pull/140
+
 #### v2.10.1
 * Ask layer before stopping/deleting instances; know which file creatable instance is in
 
