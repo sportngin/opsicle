@@ -1,5 +1,6 @@
 require 'gli'
 require "opsicle/user_profile"
+require "opsicle/opsworks_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
@@ -9,10 +10,9 @@ module Opsicle
 
     def initialize(environment)
       @client = Client.new(environment)
-      @opsworks = @client.opsworks
-      @ec2 = @client.ec2
+      @opsworks_adapater = OpsworksAdapter.new(@client)
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
+      @stack = ManageableStack.new(stack_id, @opsworks_adapater.client)
       @cli = HighLine.new
     end
 
@@ -36,11 +36,11 @@ module Opsicle
 
     def select_layer
       puts "\nLayers:\n"
-      ops_layers = @opsworks.describe_layers({ :stack_id => @stack.id }).layers
+      ops_layers = @opsworks_adapater.get_layers(@stack.id)
 
       layers = []
       ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
+        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks_adapater.client, @client.ec2, @cli)
       end
 
       layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
