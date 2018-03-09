@@ -54,9 +54,11 @@ module Opsicle
         bastion_hostname = client.config.opsworks_config[:bastion_hostname]
         Output.say "Connecting via bastion with hostname '#{bastion_hostname}'"
         bastion_hostname
-      else
-        false
       end
+    end
+
+    def use_bastion?
+      !!(client.config.opsworks_config[:bastion_layer_id] || client.config.opsworks_config[:bastion_hostname])
     end
 
     def ssh_ip(instance)
@@ -71,8 +73,12 @@ module Opsicle
     def ssh_command(instance, options={})
       ssh_command = " \"#{options[:"ssh-cmd"].gsub(/'/){ %q(\') }}\"" if options[:"ssh-cmd"] #escape single quotes
       ssh_options = options[:"ssh-opts"] ? "#{options[:"ssh-opts"]} " : ""
-      external_ip = bastion_ip || public_ips.sample
-      if instance_ip = ssh_ip(instance)
+      external_ip = public_ips.sample
+      if use_bastion?
+        external_ip = bastion_ip
+        ssh_string = "#{ssh_username}@#{external_ip} ssh #{instance[:private_ip]}"
+        ssh_options.concat('-A -t ')
+      elsif instance_ip = ssh_ip(instance)
         ssh_string = "#{ssh_username}@#{instance_ip}"
       else
         ssh_string = "#{ssh_username}@#{external_ip} ssh #{instance[:private_ip]}"
