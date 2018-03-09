@@ -1,123 +1,49 @@
-#### v2.5.0
-* Add bastion host option to opsicle config
+#### v2.11.0
+* Make an opsworks adapter that calls an opsworks client
 
-  > Tim Sandquist: Unknown User, Andy Fleener: https://github.com/sportngin/opsicle/pull/122
+  > Emma Sax, Vivek Bisen: Tony Song, Unknown User: https://github.com/sportngin/opsicle/pull/140
 
-#### v2.4.1
-* Make each generated hostname unique when counting up
+#### v2.10.1
+* Ask layer before stopping/deleting instances; know which file creatable instance is in
 
-  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/121
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/138
 
-#### v2.4.0
-#### v2.4.0
-* Generate valid hostnames when source hostname doesn't end with digits
+#### v2.10.0
+* Rename cloneable things to manageable things
 
-  > mykola42: : https://github.com/sportngin/opsicle/pull/118
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/137
 
-* make aws profile optional (support cross account assume role)
+#### v2.9.6
+#### v2.9.5
+#### v2.9.4
+* Show private IPs of instances in `opsicle instances env` command
 
-  > troyready: : https://github.com/sportngin/opsicle/pull/119
- 
-* require minitar ~> 0.6
+  > Vivek Bisen: Tim Sandquist, Unknown User: https://github.com/sportngin/opsicle/pull/132
 
-  > troyready: : https://github.com/sportngin/opsicle/pull/120
-  
-#### v2.3.1
-* Ruby Compatibility
+#### v2.9.3
+* Fix bug where cloning multiple instances will always result in the same subnet zones, AMIs, and agent versions
 
-  > Brian Bergstrom: : https://github.com/sportngin/opsicle/pull/116
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/130
 
-#### v2.3.0
-* Add ability to override AMI id, agent version, and instance type when cloning an instance
+#### v2.9.2
+#### v2.9.1
+* Display Layer short name instead of readable name to make it easier to copy/paste
 
-  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/112
+  > Tim Sandquist: Vivek Bisen, Unknown User: https://github.com/sportngin/opsicle/pull/125
 
-#### v2.2.1
-* Regional Endpoints
+#### v2.9.0
+* Make new clones of instances with only the Subnet ID
 
-  > Mykola: Unknown User, Andy Fleener: https://github.com/sportngin/opsicle/pull/111
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/129
 
-#### v2.2.0
-* Support for configurable aws credentials profile name
+#### v2.8.0
+* opsicle clone-instance --with-defaults environment
 
-  > Brian Bergstrom: : https://github.com/sportngin/opsicle/pull/108
+  > Vivek Bisen, Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/126
 
-#### v2.1.0
-* Clone instances
+#### v2.7.0
+* Start instance after cloning it
 
-  > Mykola, Emma Sax: Brian Bergstrom, Andy Fleener: https://github.com/sportngin/opsicle/pull/95
+  > Vivek Bisen: Unknown User: https://github.com/sportngin/opsicle/pull/124
 
-#### v2.0.2
-* Make new directory for credentials file if it doesn't already exist
-
-  > Emma Sax: Andy Fleener: https://github.com/sportngin/opsicle/pull/104
-
-#### v2.0.1
-* Only prompt for MFA if requested by the user
-
-  > Matt Krieger: Brian Bergstrom: https://github.com/sportngin/opsicle/pull/105
-
-#### v2.0.0
-* Adding configuration for authenticating to AWS through credentials file
-
-  > Emma Sax: Brian Bergstrom: https://github.com/sportngin/opsicle/pull/100
-
-#### v1.1.1
-* Fix bug with failure-log command
-
-  > Emma Sax: Brian Bergstrom: https://github.com/sportngin/opsicle/pull/99
-
-#### v1.1.0
-* Adding command to get recent failure log from failed deployment
-
-  > Emma Sax: Chris Arcand, Brian Bergstrom: https://github.com/sportngin/opsicle/pull/97
-
-#### v1.0.1
-* Fix bug that prevents users from updating chef cookbooks on aws-sdk v2
-
-  > Emma Sax: Brian Bergstrom: https://github.com/sportngin/opsicle/pull/98
-
-#### v1.0.0
-* Simplifying legacy-credential-converter to use hash to read credentials, not regexes"
-
-  > Brian Bergstrom, newzac, Emma Sax: : https://github.com/sportngin/opsicle/pull/92
-
-* Upgrading aws-sdk to v2 from v1
-
-  > Emma Sax: Andy Fleener: https://github.com/sportngin/opsicle/pull/91
-
-* Making conversion command from .fog to .aws/credentials
-
-  > Emma Sax: Andy Fleener: https://github.com/sportngin/opsicle/pull/90
-
-#### v0.18.1
-#### v0.18.0
-#### v0.16.0
-#### v0.15.0
-#### v0.14.0
-#### v0.13.1
-* No TTY compatibility for monitor
-
-  > Brian Bergstrom, Chris Arcand: Nick LaMuro: https://github.com/sportngin/opsicle/pull/78
-
-#### v0.13.0
-* Adding update command
-
-  > Brian Bergstrom: https://github.com/sportngin/opsicle/pull/76
-  
-#### v0.12.0
-* Adding additional info to list instances, ssh and monitor.
-
-  > Brian Bergstrom: https://github.com/sportngin/opsicle/pull/75
-  
-#### v0.11.0
-* Adding MFA support.
-
-  > Brian Bergstrom: https://github.com/sportngin/opsicle/pull/74
-  
-#### v0.10.0
-* Adding the ability connect to a private instance with a proxy
-
-  > Elliot Hursh: https://github.com/sportngin/opsicle/pull/73
-  
-#### v0.9.0
+#### v2.6.0

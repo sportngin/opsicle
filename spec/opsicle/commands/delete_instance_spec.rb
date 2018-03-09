@@ -4,7 +4,7 @@ require 'gli'
 require "opsicle/user_profile"
 
 module Opsicle
-  describe CloneInstance do
+  describe DeleteInstance do
     before do
       @instance1 = double('instance1', :hostname => 'example-hostname-01', :status => 'active',
                                        :ami_id => 'ami_id', :instance_type => 'instance_type',
@@ -37,7 +37,6 @@ module Opsicle
       @ec2 = double('ec2')
       @config = double('config', :opsworks_config => {:stack_id => 1234567890})
       @client = double('client', :config => @config, :opsworks => @opsworks, :ec2 => @ec2)
-      allow(Client).to receive(:new).with(:environment).and_return(@client)
       allow(@instances).to receive(:each_with_index)
       @agent_version_1 = double('agent_version', :version => '3434-20160316181345')
       @agent_version_2 = double('agent_version', :version => '3435-20160406115841')
@@ -61,49 +60,22 @@ module Opsicle
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to override this subnet ID? By overriding, you are choosing to override the current subnet ID for all of the following instances you're cloning.\n1) Yes\n2) No", Integer).and_return(2)
       allow_any_instance_of(HighLine).to receive(:ask).with("Which subnet ID?\n", Integer).and_return(1)
       allow_any_instance_of(HighLine).to receive(:ask).with("Do you wish to start this new instance?\n1) Yes\n2) No", Integer).and_return(1)
-      allow_any_instance_of(HighLine).to receive(:ask).with("\nDo you wish to add EC2 tags to this instance?\n1) Yes\n2) No", Integer).and_return(2)
     end
 
-    context "#execute" do
-      it "lists all current layers" do
-        expect(@opsworks).to receive(:describe_layers)
-        CloneInstance.new(:environment).execute
-      end
+    subject{DeleteInstance.new("staging")}
 
-      it "lists all current instances" do
-        expect(@opsworks).to receive(:describe_instances)
-        CloneInstance.new(:environment).execute
-      end
-    end
-
-    context "#select_layer" do
-      it "should list layers" do
-        expect(@opsworks).to receive(:describe_layers)
-        CloneInstance.new(:environment).select_layer
-      end
-
-      it "should get the layer id" do
-        expect(@layer2).to receive(:layer_id)
-        CloneInstance.new(:environment).select_layer
-      end
-    end
-
-    context "#select_instances" do
-      it "should list instances" do
-        expect(@instances).to receive(:[])
-        CloneInstance.new(:environment).select_instances(@instances)
-      end
-    end
-
-    context "#client" do
-      it "generates a new AWS client from the given configs" do
-        @config = double('config', :opsworks_config => {:stack_id => 1234567890})
-        @client = double('client', :config => @config,
-                                   :opsworks => @opsworks,
-                                   :ec2 => @ec2)
-        expect(Client).to receive(:new).with(:environment).and_return(@client)
-        CloneInstance.new(:environment)
-      end
-    end
+    # context "#execute" do
+    #   it "lists deleteable instances" do
+    #     allow(subject).to receive("staging"){[@instance1]}
+    #     expect(@stack).to receive(:deleteable_instances)
+    #     subject.execute
+    #   end
+    #
+    #   it "deletes the selected instance" do
+    #     allow(subject).to receive("staging"){[@instance1]}
+    #     expect(@opsworks).to receive(:delete_instance)
+    #     subject.execute
+    #   end
+    # end
   end
 end

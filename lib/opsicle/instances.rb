@@ -18,9 +18,13 @@ module Opsicle
       instance[:elastic_ip] ? "#{instance[:elastic_ip]} EIP" : instance[:public_ip]
     end
 
+    def self.private_ip(instance)
+      instance[:private_ip]
+    end
+
     def self.find_by_ip(client, ips)
       instances = new(client).data.reject { |instance| instances_matching_ips(instance, ips) }
-      instances.empty? ? nil : instances 
+      instances.empty? ? nil : instances
     end
 
     def self.instances_matching_ips(instance, ip_addresses)
@@ -32,7 +36,7 @@ module Opsicle
 
     def self.find_by_eip(client)
       instances =  new(client).data.reject { |instance| instance[:elastic_ip] == nil }
-      instances.empty? ? nil : instances 
+      instances.empty? ? nil : instances
     end
 
     def instances(options={})
