@@ -58,11 +58,7 @@ module Opsicle
     end
 
     def use_bastion?
-      if client.config.opsworks_config[:bastion_layer_id] || client.config.opsworks_config[:bastion_hostname]
-        true
-      else
-        false
-      end
+      !!(client.config.opsworks_config[:bastion_layer_id] || client.config.opsworks_config[:bastion_hostname])
     end
 
     def ssh_ip(instance)
