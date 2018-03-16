@@ -1,3 +1,4 @@
+#### v2.11.1
 #### v2.11.0
 * Make an opsworks adapter that calls an opsworks client
 
