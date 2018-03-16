@@ -18,13 +18,34 @@ module Opsicle
     end
 
     def print(instances)
-      puts Terminal::Table.new headings: ['Hostname', 'Layers', 'Status', 'Public IP', 'Private IP'], rows: instance_data(instances)
+      puts Terminal::Table.new(
+        headings: [
+          'Hostname',
+          'Size',
+          'Layers',
+          'Status',
+          'Public IP',
+          'Private IP',
+          'Zone'
+        ],
+        rows: instance_data(instances)
+      )
     end
 
     def instance_data(instances)
-      instances.sort { |a,b| a[:hostname] <=> b[:hostname] }.map { |instance|
-        [instance[:hostname], layer_names(instance), instance[:status], Opsicle::Instances::pretty_ip(instance), Opsicle::Instances::private_ip(instance)]
-      }
+      instances
+        .sort { |a,b| a[:hostname] <=> b[:hostname] }
+        .map do |instance|
+          [
+            instance[:hostname],
+            instance[:instance_type],
+            layer_names(instance),
+            instance[:status],
+            Opsicle::Instances::pretty_ip(instance),
+            Opsicle::Instances::private_ip(instance),
+            instance[:availability_zone]
+          ]
+        end
     end
 
     def layer_names(instance)
