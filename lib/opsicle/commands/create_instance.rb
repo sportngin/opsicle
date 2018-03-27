@@ -26,7 +26,7 @@ module Opsicle
     end
 
     def create_instance(layer, options)
-      CreatableInstance.new(layer, @stack, @opsworks, @ec2, @cli).create(options)
+      CreatableInstance.new(layer, @stack, @opsworks_adapter.client, @client.ec2, @cli).create(options)
     end
 
     def select_layer
