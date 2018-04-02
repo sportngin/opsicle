@@ -9,10 +9,9 @@ module Opsicle
 
     def initialize(environment)
       @client = Client.new(environment)
-      @opsworks = @client.opsworks
-      @ec2 = @client.ec2
+      @opsworks_adapter = OpsworksAdapter.new(@client)
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks)
+      @stack = ManageableStack.new(stack_id, @opsworks_adapter.client)
       @cli = HighLine.new
     end
 
@@ -22,7 +21,7 @@ module Opsicle
       instances_to_delete = select_instances(layer)
       instances_to_delete.each do |instance|
         begin
-          @opsworks.delete_instance(instance_id: instance.instance_id)
+          @opsworks_adapter.delete_instance(instance.instance_id)
           puts "Successfully deleted #{instance.hostname}"
         rescue
           puts "Failed to delete #{instance.hostname}"
@@ -36,11 +35,11 @@ module Opsicle
 
     def select_layer
       puts "\nLayers:\n"
-      ops_layers = @opsworks.describe_layers({ :stack_id => @stack.id }).layers
+      ops_layers = @opsworks_adapter.get_layers(@stack_id)
 
       layers = []
       ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks, @ec2, @cli)
+        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks_adapter.client, @client.ec2, @cli)
       end
 
       layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }

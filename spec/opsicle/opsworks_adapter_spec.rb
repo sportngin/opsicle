@@ -29,4 +29,11 @@ describe Opsicle::OpsworksAdapter do
       subject.start_instance(:instance_id)
     end
   end
+
+  describe "#delete_instance" do
+    it "should call delete_instance on the opsworks client" do
+      expect(aws_opsworks_client).to receive(:delete_instance).with(instance_id: :instance_id)
+      subject.delete_instance(:instance_id)
+    end
+  end
 end
