@@ -30,6 +30,13 @@ describe Opsicle::OpsworksAdapter do
     end
   end
 
+  describe "#stop_instance" do
+    it "should call stop_instance on the opsworks client" do
+      expect(aws_opsworks_client).to receive(:stop_instance).with(instance_id: :instance_id)
+      subject.stop_instance(:instance_id)
+    end
+  end
+
   describe "#delete_instance" do
     it "should call delete_instance on the opsworks client" do
       expect(aws_opsworks_client).to receive(:delete_instance).with(instance_id: :instance_id)

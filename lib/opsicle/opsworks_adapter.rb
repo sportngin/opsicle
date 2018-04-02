@@ -13,6 +13,10 @@ class Opsicle::OpsworksAdapter
     client.start_instance(instance_id: instance_id)
   end
 
+  def stop_instance(instance_id)
+    client.stop_instance(instance_id: instance_id)
+  end
+
   def delete_instance(instance_id)
     client.delete_instance(instance_id: instance_id)
   end
