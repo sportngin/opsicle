@@ -1,9 +1,8 @@
 describe Opsicle::Ec2Adapter do
   let(:aws_ec2_client) do
-    double(
-     :aws_ec2_client,
+    double(:aws_ec2_client,
      describe_subnets: double(:subnets, subnets: []),
-     create_tags: :successful_response
+     create_tags: :tags_created
     )
   end
   let(:client) { double(:client, ec2: aws_ec2_client) }
@@ -18,7 +17,7 @@ describe Opsicle::Ec2Adapter do
 
   describe "#tag_instance" do
     it "should call to create a tag on an instance" do
-      expect(subject.tag_instance(:instance_id, [1, 2, 3])).to eq(:successful_response)
+      expect(subject.tag_instance(:instance_id, [1, 2, 3])).to eq(:tags_created)
     end
   end
 end
