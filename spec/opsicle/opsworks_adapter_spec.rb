@@ -3,7 +3,9 @@ describe Opsicle::OpsworksAdapter do
     double(
      :aws_opsworks_client,
      describe_layers: double(:layers, layers: []),
-     start_instance: true
+     start_instance: :successful_response,
+     stop_instance: :successful_response,
+     delete_instance: :successful_response
     )
   end
   let(:client) { double(:client, opsworks: aws_opsworks_client) }
@@ -16,31 +18,23 @@ describe Opsicle::OpsworksAdapter do
     it "should gather an array of layers for this opsworks client" do
       expect(get_layers).to be_empty
     end
-
-    it "should call describe_layers on the opsworks client" do
-      expect(aws_opsworks_client).to receive(:describe_layers).with(stack_id: :stack_id)
-      get_layers
-    end
   end
 
   describe "#start_instance" do
     it "should call start_instance on the opsworks client" do
-      expect(aws_opsworks_client).to receive(:start_instance).with(instance_id: :instance_id)
-      subject.start_instance(:instance_id)
+      expect(subject.start_instance(:instance_id)).to eq(:successful_response)
     end
   end
 
   describe "#stop_instance" do
     it "should call stop_instance on the opsworks client" do
-      expect(aws_opsworks_client).to receive(:stop_instance).with(instance_id: :instance_id)
-      subject.stop_instance(:instance_id)
+      expect(subject.stop_instance(:instance_id)).to eq(:successful_response)
     end
   end
-
+  
   describe "#delete_instance" do
     it "should call delete_instance on the opsworks client" do
-      expect(aws_opsworks_client).to receive(:delete_instance).with(instance_id: :instance_id)
-      subject.delete_instance(:instance_id)
+      expect(subject.delete_instance(:instance_id)).to eq(:successful_response)
     end
   end
 end
