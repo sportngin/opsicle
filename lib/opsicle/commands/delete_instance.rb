@@ -1,5 +1,6 @@
 require 'gli'
 require "opsicle/user_profile"
+require "opsicle/opsworks_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
