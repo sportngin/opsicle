@@ -1,3 +1,12 @@
+#### v2.12.0
+* Use opsworks adapter on other command files
+
+  > Emma Sax: Unknown User: https://github.com/sportngin/opsicle/pull/144
+
+* Use opsworks adapter on create_instance command file
+
+  > Emma Sax: Vivek Bisen, Unknown User: https://github.com/sportngin/opsicle/pull/143
+
 #### v2.11.3
 #### v2.11.2
 #### v2.11.1
