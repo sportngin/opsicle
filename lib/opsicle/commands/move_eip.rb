@@ -1,5 +1,6 @@
 require 'gli'
 require "opsicle/user_profile"
+require "opsicle/opsworks_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
@@ -9,11 +10,10 @@ module Opsicle
 
     def initialize(environment)
       @client = Client.new(environment)
-      @opsworks = @client.opsworks
-      @ec2 = @client.ec2
+      @opsworks_adpater = OpsworksAdapter.new(@client)
       stack_id = @client.config.opsworks_config[:stack_id]
       @cli = HighLine.new
-      @stack = ManageableStack.new(@client.config.opsworks_config[:stack_id], @opsworks, @cli)
+      @stack = ManageableStack.new(stack_id, @opsworks_adpater.client, @cli)
     end
 
     def execute(options={})
