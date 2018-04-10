@@ -12,7 +12,7 @@ module Opsicle
       @client = Client.new(environment)
       @opsworks_adapter = OpsworksAdapter.new(@client)
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = ManageableStack.new(stack_id, @opsworks_adapter.client)
+      @stack = ManageableStack.new(stack_id, @opsworks_adapter)
       @cli = HighLine.new
     end
 
@@ -31,7 +31,7 @@ module Opsicle
 
     def select_layer
       puts "\nLayers:\n"
-      ops_layers = @opsworks_adapter.get_layers(@stack.id)
+      ops_layers = @opsworks_adapter.layers(@stack.id)
 
       layers = []
       ops_layers.each do |layer|

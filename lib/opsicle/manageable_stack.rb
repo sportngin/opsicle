@@ -1,10 +1,10 @@
 module Opsicle
   class ManageableStack
-    attr_accessor :id, :opsworks, :stack, :vpc_id, :eips, :cli
+    attr_accessor :id, :opsworks_adapter, :stack, :vpc_id, :eips, :cli
 
-    def initialize(stack_id, opsworks, cli=nil)
+    def initialize(stack_id, opsworks_adapter, cli=nil)
       self.id = stack_id
-      self.opsworks = opsworks
+      self.opsworks_adapter = opsworks_adapter
       self.cli = cli
       self.stack = get_stack
       self.vpc_id = self.stack.vpc_id
@@ -12,11 +12,11 @@ module Opsicle
     end
 
     def get_stack
-      @opsworks.describe_stacks({ :stack_ids => [self.id.to_s] }).stacks.first
+      @opsworks_adapter.stack(self.id.to_s)
     end
 
     def get_eips
-      self.eips = @opsworks.describe_elastic_ips(stack_id: self.id.to_s).elastic_ips
+      self.eips = @opsworks_adapter.elastic_ips(self.id.to_s)
     end
 
     def gather_eip_information
@@ -24,10 +24,10 @@ module Opsicle
 
       @eips.each do |eip|
         instance_id = eip.instance_id
-        instance = @opsworks.describe_instances(instance_ids: [instance_id]).instances.first
+        instance = @opsworks_adapter.instance(instance_id)
         instance_name = instance.hostname
         layer_id = instance.layer_ids.first
-        layer = @opsworks.describe_layers(layer_ids: [layer_id]).layers.first
+        layer = @opsworks_adapter.layer(layer_id)
         layer_name = layer.name
         eip_information << { eip: eip, ip_address: eip.ip, instance_name: instance_name, layer_id: layer_id }
       end
@@ -44,7 +44,7 @@ module Opsicle
 
     def ask_which_target_instance(moveable_eip)
       puts "\nHere are all of the instances in the current instance's layer:"
-      instances = @opsworks.describe_instances(layer_id: moveable_eip[:layer_id]).instances
+      instances = @opsworks_adapter.instances_by_layer(moveable_eip[:layer_id])
       instances = instances.select { |instance| instance.elastic_ip.nil? && instance.auto_scaling_type.nil? }
       instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
       instance_index = @cli.ask("What is your target instance?\n", Integer) { |q| q.in = 1..instances.length.to_i } - 1
@@ -52,7 +52,7 @@ module Opsicle
     end
 
     def transfer_eip(moveable_eip, target_instance_id)
-      @opsworks.associate_elastic_ip({ elastic_ip: moveable_eip[:ip_address], instance_id: target_instance_id })
+      @opsworks_adapter.associate_elastic_ip(moveable_eip[:ip_address], target_instance_id)
       puts "\nEIP #{moveable_eip[:ip_address]} was moved to instance #{target_instance_id}"
     end
 
@@ -65,7 +65,7 @@ module Opsicle
     end
 
     def instances
-      @opsworks.describe_instances(stack_id: self.id).instances
+      @opsworks_adapter.instances_by_stack(stack_id: self.id).instances
     end
 
     def deleteable_instances(layer)

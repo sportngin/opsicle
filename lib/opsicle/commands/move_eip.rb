@@ -13,7 +13,7 @@ module Opsicle
       @opsworks_adpater = OpsworksAdapter.new(@client)
       stack_id = @client.config.opsworks_config[:stack_id]
       @cli = HighLine.new
-      @stack = ManageableStack.new(stack_id, @opsworks_adpater.client, @cli)
+      @stack = ManageableStack.new(stack_id, @opsworks_adpater, @cli)
     end
 
     def execute(options={})
