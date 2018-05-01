@@ -6,23 +6,18 @@ module Opsicle
       self.id = stack_id
       self.opsworks_adapter = opsworks_adapter
       self.cli = cli
-      self.stack = get_stack
+      self.stack = @opsworks_adapter.stack(self.id)
       self.vpc_id = self.stack.vpc_id
-      self.eips = nil
-    end
-
-    def get_stack
-      @opsworks_adapter.stack(self.id.to_s)
     end
 
     def get_eips
-      self.eips = @opsworks_adapter.elastic_ips(self.id.to_s)
+      @opsworks_adapter.elastic_ips(self.id.to_s)
     end
 
-    def gather_eip_information
+    def gather_eip_information(eips)
       eip_information = []
 
-      @eips.each do |eip|
+      eips.each do |eip|
         instance_id = eip.instance_id
         instance = @opsworks_adapter.instance(instance_id)
         instance_name = instance.hostname
@@ -57,8 +52,8 @@ module Opsicle
     end
 
     def move_eip
-      get_eips
-      eip_information = gather_eip_information
+      eips = get_eips
+      eip_information = gather_eip_information(eips)
       moveable_eip = ask_which_eip_to_move(eip_information)
       target_instance_id = ask_which_target_instance(moveable_eip)
       transfer_eip(moveable_eip, target_instance_id)
