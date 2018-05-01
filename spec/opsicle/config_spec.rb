@@ -32,7 +32,7 @@ module Opsicle
           allow(Aws::IAM::Client).to receive(:new).and_return(client)
           coffee_types = {:coffee => "cappuccino", :beans => "arabica"}
           allow(coffee_types).to receive('set?').and_return(true)
-          allow(Aws.config).to receive(:update).with({region: 'us-east-1', credentials: coffee_types})
+          allow(Aws.config).to receive(:update).with({profile: 'derp', credentials: coffee_types})
           allow(Aws::SharedCredentials).to receive(:new).and_return(coffee_types)
           expect(subject.aws_credentials).to eq(coffee_types)
         end
@@ -44,7 +44,7 @@ module Opsicle
           allow(Aws::IAM::Client).to receive(:new).and_return(client)
           coffee_types = {:coffee => "cappuccino", :beans => "arabica"}
           allow(coffee_types).to receive('set?').and_return(true)
-          allow(Aws.config).to receive(:update).with({region: 'us-east-1', credentials: coffee_types})
+          allow(Aws.config).to receive(:update).with({profile: 'tacos', credentials: coffee_types})
           allow(Aws::SharedCredentials).to receive(:new).with(profile_name: 'tacos').and_return(coffee_types)
           expect(subject.aws_credentials).to eq(coffee_types)
         end

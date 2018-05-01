@@ -79,7 +79,7 @@ module Opsicle
         abort('Opsicle can no longer authenticate through your ~/.fog file. Please run `opsicle legacy-credential-converter` before proceeding.')
       end
 
-      aws_opts = {region: region}
+      aws_opts = {profile: profile_name}
       aws_opts[:credentials] = credentials unless credentials.nil?
       Aws.config.update aws_opts
 
