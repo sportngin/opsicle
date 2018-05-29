@@ -8,12 +8,14 @@ require "opsicle/aws_instance_manager_helper"
 
 module Opsicle
   class MoveEip
+    include Opsicle::AwsInstanceManagerHelper
+
     def initialize(environment)
       @client = Client.new(environment)
-      @opsworks_adpater = OpsworksAdapter.new(@client)
+      @opsworks_adapter = OpsworksAdapter.new(@client)
       stack_id = @client.config.opsworks_config[:stack_id]
       @cli = HighLine.new
-      @stack = ManageableStack.new(stack_id, @opsworks_adpater, @cli)
+      @stack = ManageableStack.new(stack_id, @opsworks_adapter, @cli)
     end
 
     def execute(options={})

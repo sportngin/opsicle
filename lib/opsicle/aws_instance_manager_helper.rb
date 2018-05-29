@@ -3,7 +3,7 @@ module Opsicle
     ##########################
     ### Moving around EIPs ###
     ##########################
-    
+
     def ask_which_eip_to_move(eip_information)
       puts "\nHere are all of the EIPs for this stack:"
       eip_information.each_with_index { |h, index| puts "#{index.to_i + 1}) #{h[:ip_address]} connected to #{h[:instance_name]}" }
