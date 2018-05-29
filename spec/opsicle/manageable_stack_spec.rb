@@ -20,7 +20,7 @@ describe Opsicle::ManageableStack do
   let(:opsworks_adapter) do
     double(:opsworks_adapter,
       elastic_ips: true,
-      instances_by_stack: double(:instances, instances: [deleteable_instance, stoppable_instance]),
+      instances_by_stack: [deleteable_instance, stoppable_instance],
       associate_elastic_ip: true,
       stack: double(:stack, vpc_id: "123")
     )

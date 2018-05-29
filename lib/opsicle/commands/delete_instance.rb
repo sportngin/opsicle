@@ -36,7 +36,7 @@ module Opsicle
 
     def select_layer
       puts "\nLayers:\n"
-      ops_layers = @opsworks_adapter.layers(@stack_id)
+      ops_layers = @opsworks_adapter.layers(@stack.id)
 
       layers = []
       ops_layers.each do |layer|

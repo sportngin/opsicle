@@ -19,7 +19,7 @@ module Opsicle
     end
 
     def instances
-      @opsworks_adapter.instances_by_stack(stack_id: self.id).instances
+      @opsworks_adapter.instances_by_stack(self.id)
     end
 
     def deleteable_instances(layer)
