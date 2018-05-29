@@ -18,7 +18,15 @@ module Opsicle
 
     def execute(options={})
       puts "Stack ID = #{@stack.id}"
-      @stack.move_eip
+      move_eip
+      puts "\nEIP #{moveable_eip[:ip_address]} was moved to instance #{target_instance_id}"
+    end
+
+    def move_eip
+      eip_information = gather_eip_information(@stack.get_eips)
+      moveable_eip = ask_which_eip_to_move(eip_information)
+      target_instance_id = ask_which_target_instance(moveable_eip)
+      @stack.transfer_eip(moveable_eip, target_instance_id)
     end
   end
 end
