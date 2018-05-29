@@ -11,10 +11,10 @@ module Opsicle
 
     def initialize(environment)
       @client = Client.new(environment)
-      @opsworks_adapater = OpsworksAdapter.new(@client)
       @ec2_adapter = Ec2Adapter.new(@client)
+      @opsworks_adapter = OpsworksAdapter.new(@client)
       stack_id = @client.config.opsworks_config[:stack_id]
-      @stack = ManageableStack.new(stack_id, @opsworks_adapater.client)
+      @stack = ManageableStack.new(stack_id, @opsworks_adapter.client)
       @cli = HighLine.new
     end
 
@@ -38,11 +38,11 @@ module Opsicle
 
     def select_layer
       puts "\nLayers:\n"
-      ops_layers = @opsworks_adapater.get_layers(@stack.id)
+      ops_layers = @opsworks_adapter.get_layers(@stack.id)
 
       layers = []
       ops_layers.each do |layer|
-        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks_adapater.client, @ec2_adapter.client, @cli)
+        layers << ManageableLayer.new(layer.name, layer.layer_id, @stack, @opsworks_adapter.client, @ec2_adapter.client, @cli)
       end
 
       layers.each_with_index { |layer, index| puts "#{index.to_i + 1}) #{layer.name}" }
