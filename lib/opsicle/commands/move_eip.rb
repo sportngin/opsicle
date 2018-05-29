@@ -4,10 +4,10 @@ require "opsicle/opsworks_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
+require "opsicle/aws_instance_manager_helper"
 
 module Opsicle
   class MoveEip
-
     def initialize(environment)
       @client = Client.new(environment)
       @opsworks_adpater = OpsworksAdapter.new(@client)
