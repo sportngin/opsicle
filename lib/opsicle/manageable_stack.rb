@@ -22,7 +22,6 @@ module Opsicle
     def gather_eip_information
       eip_information = []
 
-      puts "eips: #{@eips}"
       @eips.each do |eip|
         next unless eip.instance_id
         instance_id = eip.instance_id
