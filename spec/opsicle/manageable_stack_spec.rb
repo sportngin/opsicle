@@ -17,9 +17,18 @@ describe Opsicle::ManageableStack do
     )
   end
 
+  let(:eip) do
+    double(:eip,
+      instance_id: "123",
+      ip: "ip-123"
+    )
+  end
+
   let(:opsworks_adapter) do
     double(:opsworks_adapter,
-      elastic_ips: true,
+      instance: double(:instance, hostname: "example-hostname", layer_ids: ["id1", "id2"]),
+      layer: double(:layer, name: "layer-name"),
+      elastic_ips: [eip],
       instances_by_stack: [deleteable_instance, stoppable_instance],
       associate_elastic_ip: true,
       stack: double(:stack, vpc_id: "123")
@@ -30,11 +39,11 @@ describe Opsicle::ManageableStack do
   
   subject { described_class.new(stack_id, opsworks_adapter) }
 
-  describe "#get_eips" do
-    let(:eips) { subject.get_eips }
+  describe "#gather_eips" do
+    let(:eips) { subject.gather_eips }
 
     it "should call opsworks adapter to get a list of EIPs" do
-      expect(eips).to eq(true)
+      expect(eips).to eq([{eip: eip, ip_address: "ip-123", instance_name: "example-hostname", layer_id: "id1"}])
     end
   end
 

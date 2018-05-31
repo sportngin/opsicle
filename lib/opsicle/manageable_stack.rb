@@ -2,6 +2,8 @@ module Opsicle
   class ManageableStack
     attr_accessor :id, :opsworks_adapter, :stack, :vpc_id, :eips, :cli
 
+    STOPPABLE_STATES = %w(start_failed stop_failed online running_setup setup_failed booting rebooting)
+
     def initialize(stack_id, opsworks_adapter, cli=nil)
       self.id = stack_id
       self.opsworks_adapter = opsworks_adapter
@@ -10,8 +12,21 @@ module Opsicle
       self.vpc_id = self.stack.vpc_id
     end
 
-    def get_eips
-      @opsworks_adapter.elastic_ips(self.id.to_s)
+    def gather_eips
+      eips = @opsworks_adapter.elastic_ips(self.id.to_s)
+      eip_information = []
+
+      eips.each do |eip|
+        instance_id = eip.instance_id
+        instance = @opsworks_adapter.instance(instance_id)
+        instance_name = instance.hostname
+        layer_id = instance.layer_ids.first
+        layer = @opsworks_adapter.layer(layer_id)
+        layer_name = layer.name
+        eip_information << { eip: eip, ip_address: eip.ip, instance_name: instance_name, layer_id: layer_id }
+      end
+
+      eip_information
     end
 
     def transfer_eip(moveable_eip, target_instance_id)
@@ -33,13 +48,9 @@ module Opsicle
     def stoppable_instances(layer)
       instances.select do |instance|
         instance.elastic_ip.nil? &&
-        stoppable_states.include?(instance.status) &&
+        STOPPABLE_STATES.include?(instance.status) &&
         instance.layer_ids.include?(layer.layer_id)
       end
-    end
-
-    def stoppable_states
-      %w(start_failed stop_failed online running_setup setup_failed booting rebooting)
     end
   end
 end
