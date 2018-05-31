@@ -42,24 +42,39 @@ describe Opsicle::ManageableStack do
   describe "#gather_eips" do
     let(:eips) { subject.gather_eips }
 
-    it "should call opsworks adapter to get a list of EIPs" do
+    it "should properly find and format EIPs" do
       expect(eips).to eq([{eip: eip, ip_address: "ip-123", instance_name: "example-hostname", layer_id: "id1"}])
+    end
+
+    it "should call opsworks_adapter to gather EIPs" do
+      expect(opsworks_adapter).to receive(:elastic_ips)
+      subject.gather_eips
     end
   end
 
   describe "#transfer_eip" do
     let(:transfer) { subject.transfer_eip({ip_address: true}, "target_instance_id") }
 
-    it "should call opsworks adapter to get transfer an EIP" do
+    it "should properly transfer the EIP" do
       expect(transfer).to eq(true)
+    end
+
+    it "should call opsworks_adapter to transfer EIP" do
+      expect(opsworks_adapter).to receive(:associate_elastic_ip)
+      subject.transfer_eip({ip_address: true}, "target_instance_id")
     end
   end
 
   describe "#instances" do
     let(:instances) { subject.instances }
 
-    it "should call opsworks adapter get a list of instances" do
+    it "should properly gather a list of instances" do
       expect(instances).to eq([deleteable_instance, stoppable_instance])
+    end
+
+    it "should call opsworks_adapter to get a list of instances" do
+      expect(opsworks_adapter).to receive(:instances_by_stack)
+      subject.instances
     end
   end
 

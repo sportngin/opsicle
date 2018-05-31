@@ -16,10 +16,10 @@ module Opsicle
       @cli = HighLine.new
       @stack = ManageableStack.new(stack_id, @opsworks_adapter, @cli)
 
-      @eip_asker = QuestionAsker::EipAsker.new({
+      @eip_asker = QuestionAsker::EipAsker.new(
         opsworks_adapter: @opsworks_adapter,
         highline_client: @cli
-      })
+      )
     end
 
     def execute(options={})
