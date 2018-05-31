@@ -8,12 +8,12 @@ module Opsicle
       self.id = stack_id
       self.opsworks_adapter = opsworks_adapter
       self.cli = cli
-      self.stack = @opsworks_adapter.stack(self.id)
+      self.stack = @opsworks_adapter.stack(id)
       self.vpc_id = self.stack.vpc_id
     end
 
     def gather_eips
-      eips = @opsworks_adapter.elastic_ips(self.id.to_s)
+      eips = @opsworks_adapter.elastic_ips(id)
       eip_information = []
 
       eips.each do |eip|
@@ -34,7 +34,7 @@ module Opsicle
     end
 
     def instances
-      @opsworks_adapter.instances_by_stack(self.id)
+      @opsworks_adapter.instances_by_stack(id)
     end
 
     def deleteable_instances(layer)

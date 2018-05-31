@@ -4,7 +4,8 @@ describe Opsicle::ManageableStack do
       auto_scaling_type: nil,
       status: "stopped",
       layer_ids: ["456"],
-      elastic_ip: nil
+      elastic_ip: nil,
+      hostname: "example-hostname"
     )
   end
 
@@ -17,25 +18,47 @@ describe Opsicle::ManageableStack do
     )
   end
 
-  let(:eip) do
-    double(:eip,
-      instance_id: "123",
-      ip: "ip-123"
+  let(:stack) do
+    double(:stack,
+      vpc_id: "id"
     )
   end
 
-  let(:opsworks_adapter) do
-    double(:opsworks_adapter,
-      instance: double(:instance, hostname: "example-hostname", layer_ids: ["id1", "id2"]),
-      layer: double(:layer, name: "layer-name"),
-      elastic_ips: [eip],
-      instances_by_stack: [deleteable_instance, stoppable_instance],
-      associate_elastic_ip: true,
-      stack: double(:stack, vpc_id: "123")
+  let(:layer) do
+    double(:layer,
+      layer_id: "456",
+      name: "layername"
     )
   end
+
+  let(:eip) do
+    double(:eip,
+      instance_id: "123",
+      ip: "ip-123",
+    )
+  end
+
+  let(:client) do
+    double(:client,
+      opsworks: aws_opsworks_client
+    )
+  end
+
+  let(:aws_opsworks_client) do
+    double(:aws_opsworks_client,
+      describe_stacks: double(:stacks, stacks: [stack]),
+      describe_layers: double(:layers, layers: [layer]),
+      describe_instances: double(:instances, instances: [deleteable_instance, stoppable_instance]),
+      describe_elastic_ips: double(:eips, elastic_ips: [eip]),
+      associate_elastic_ip: :associated_eip,
+      start_instance: :started,
+      stop_instance: :stopped,
+      delete_instance: :deleted
+    )
+  end
+
+  let(:opsworks_adapter) { Opsicle::OpsworksAdapter.new(client) }
   let(:stack_id) { '123' }
-  let(:layer) { double(:layer, layer_id: "456") }
   
   subject { described_class.new(stack_id, opsworks_adapter) }
 
@@ -43,12 +66,7 @@ describe Opsicle::ManageableStack do
     let(:eips) { subject.gather_eips }
 
     it "should properly find and format EIPs" do
-      expect(eips).to eq([{eip: eip, ip_address: "ip-123", instance_name: "example-hostname", layer_id: "id1"}])
-    end
-
-    it "should call opsworks_adapter to gather EIPs" do
-      expect(opsworks_adapter).to receive(:elastic_ips)
-      subject.gather_eips
+      expect(eips).to eq([{eip: eip, ip_address: "ip-123", instance_name: "example-hostname", layer_id: "456"}])
     end
   end
 
@@ -56,12 +74,7 @@ describe Opsicle::ManageableStack do
     let(:transfer) { subject.transfer_eip({ip_address: true}, "target_instance_id") }
 
     it "should properly transfer the EIP" do
-      expect(transfer).to eq(true)
-    end
-
-    it "should call opsworks_adapter to transfer EIP" do
-      expect(opsworks_adapter).to receive(:associate_elastic_ip)
-      subject.transfer_eip({ip_address: true}, "target_instance_id")
+      expect(transfer).to eq(:associated_eip)
     end
   end
 
@@ -70,11 +83,6 @@ describe Opsicle::ManageableStack do
 
     it "should properly gather a list of instances" do
       expect(instances).to eq([deleteable_instance, stoppable_instance])
-    end
-
-    it "should call opsworks_adapter to get a list of instances" do
-      expect(opsworks_adapter).to receive(:instances_by_stack)
-      subject.instances
     end
   end
 
