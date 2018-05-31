@@ -7,18 +7,27 @@ describe Opsicle::QuestionAsker::EipAsker do
 
   let(:instance) do
     double(:instance,
-      elastic_ip: "example-hostname",
-      auto_scaling_type: ["type1", "type2"],
+      elastic_ip: nil,
+      auto_scaling_type: nil,
       status: "online",
-      hostname: "example"
+      hostname: "example",
+      instance_id: "instance-id"
     )
   end
 
-  let(:opsworks_adapter) do
-    double(:opsworks_adapter,
-      instances_by_layer: [instance]
+  let(:client) do
+    double(:client,
+      opsworks: aws_opsworks_client
     )
   end
+
+  let(:aws_opsworks_client) do
+    double(:aws_opsworks_client,
+      describe_instances: double(:instances, instances: [instance])
+    )
+  end
+
+  let(:opsworks_adapter) { Opsicle::OpsworksAdapter.new(client) }
 
   let(:eip_info) do
     { eip: true, ip_address: "ip-123", instance_name: "example-hostname", layer_id: "id1" }
@@ -36,6 +45,14 @@ describe Opsicle::QuestionAsker::EipAsker do
 
     it "should return the EIP to move" do
       expect(eip_response).to eq(eip_info)
+    end
+  end
+
+  describe "#which_instance_should_get_eip" do
+    let(:instance_response) { subject.which_instance_should_get_eip(eip_info) }
+
+    it "should return a single instance" do
+      expect(instance_response).to eq("instance-id")
     end
   end
 end
