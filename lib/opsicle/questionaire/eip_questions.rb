@@ -1,6 +1,6 @@
 module Opsicle
-  module QuestionAsker
-    class EipAsker
+  module Questionaire
+    class EipQuestions
       attr_accessor :opsworks_adapter, :cli
 
       def initialize(options)

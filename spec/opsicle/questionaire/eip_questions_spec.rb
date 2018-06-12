@@ -1,4 +1,4 @@
-describe Opsicle::QuestionAsker::EipAsker do
+describe Opsicle::Questionaire::EipQuestions do
   let(:cli) do
     double(:cli,
       ask: 1

@@ -62,8 +62,8 @@ describe Opsicle::ManageableStack do
   
   subject { described_class.new(stack_id, opsworks_adapter) }
 
-  describe "#gather_eips" do
-    let(:eips) { subject.gather_eips }
+  describe "#eips" do
+    let(:eips) { subject.eips }
 
     it "should properly find and format EIPs" do
       expect(eips).to eq([{eip: eip, ip_address: "ip-123", instance_name: "example-hostname", layer_id: "456"}])

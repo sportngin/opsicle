@@ -4,7 +4,6 @@ require "opsicle/opsworks_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
-require "opsicle/question_asker/eip_asker"
 
 module Opsicle
   class MoveEip
@@ -16,7 +15,7 @@ module Opsicle
       @cli = HighLine.new
       @stack = ManageableStack.new(stack_id, @opsworks_adapter, @cli)
 
-      @eip_asker = QuestionAsker::EipAsker.new(
+      @eip_asker = Questionaire::EipQuestions.new(
         opsworks_adapter: @opsworks_adapter,
         highline_client: @cli
       )
@@ -29,7 +28,7 @@ module Opsicle
     end
 
     def move_eip
-      eip_information = @stack.gather_eips
+      eip_information = @stack.eips
       moveable_eip = eip_asker.which_eip_should_move(eip_information)
       target_instance_id = eip_asker.which_instance_should_get_eip(moveable_eip)
       @stack.transfer_eip(moveable_eip, target_instance_id)

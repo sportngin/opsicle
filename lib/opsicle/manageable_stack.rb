@@ -12,7 +12,7 @@ module Opsicle
       self.vpc_id = self.stack.vpc_id
     end
 
-    def gather_eips
+    def eips
       eips = @opsworks_adapter.elastic_ips(id)
       eip_information = []
 
