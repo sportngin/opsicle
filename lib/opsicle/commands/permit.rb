@@ -22,7 +22,7 @@ module Opsicle
     end
 
     def iam_user_arns(user_names)
-      if user_names
+      if user_names && !user_names.empty?
         profiles = @client.api_call(:describe_user_profiles)[:user_profiles]
         user_names.map do |user_name|
           profile = profiles.detect{ |profile| profile[:name] == user_name || profile[:ssh_username] == user_name}

@@ -299,7 +299,7 @@ command 'permit' do |c|
 
   c.action do |global_options, options, args|
     raise ArgumentError, "Environment is required" unless (environment = args.first)
-    Opsicle::Permit.new(*args).execute(global_options.merge(options))
+    Opsicle::Permit.new(environment).execute(options)
   end
 end
 
