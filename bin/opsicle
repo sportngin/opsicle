@@ -291,4 +291,16 @@ command 'user-profile-info' do |c|
   end
 end
 
+desc 'Add ssh and sudo permissions for current user or specified users'
+arg_name '<environment>'
+command 'permit' do |c|
+  c.flag [:u, :user], :desc => 'User name or ssh username to update.', :type => String, :multiple => true
+  c.switch [:a, :all_stacks], :desc => "Set permissions on all stacks.", :default_value => false
+
+  c.action do |global_options, options, args|
+    raise ArgumentError, "Environment is required" unless (environment = args.first)
+    Opsicle::Permit.new(*args).execute(global_options.merge(options))
+  end
+end
+
 exit run(ARGV)
