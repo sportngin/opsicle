@@ -8,7 +8,7 @@ module Opsicle
       stack_ids = options[:all_stacks] ? all_stack_ids : [current_stack_id]
       stack_ids.each do |stack_id|
         iam_user_arns(options[:user]).each do |arn|
-          @client.api_call(:set_permission, { allow_ssh: true, allow_sudo: true, iam_user_arn: arn , stack_id: stack_id } )
+          set_permission(arn, stack_id)
         end
       end
     end
@@ -23,7 +23,6 @@ module Opsicle
 
     def iam_user_arns(user_names)
       if user_names && !user_names.empty?
-        profiles = @client.api_call(:describe_user_profiles)[:user_profiles]
         user_names.map do |user_name|
           profile = profiles.detect{ |profile| profile[:name] == user_name || profile[:ssh_username] == user_name}
           raise ArgumentError, "User #{user_name} not found" unless profile
@@ -32,6 +31,14 @@ module Opsicle
       else
         [UserProfile.new(@client).arn]
       end
+    end
+
+    private def set_permission(arn, stack_id)
+      @client.api_call(:set_permission, { allow_ssh: true, allow_sudo: true, iam_user_arn: arn , stack_id: stack_id } )
+    end
+
+    private def profiles
+      @profiles ||= @client.api_call(:describe_user_profiles)[:user_profiles]
     end
   end
 end
