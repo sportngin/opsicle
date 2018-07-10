@@ -10,19 +10,39 @@ module Opsicle
 
       def which_eip_should_move(eip_information)
         puts "\nHere are all of the EIPs for this stack:"
-        eip_information.each_with_index { |h, index| puts "#{index.to_i + 1}) #{h[:ip_address]} connected to #{h[:instance_name]}" }
-        eip_index = @cli.ask("Which EIP would you like to move?\n", Integer) { |q| q.in = 1..eip_information.length.to_i } - 1
+        print_current_eips(eip_information)
+        eip_index = ask_eip_question("Which EIP would you like to move?\n", eip_information)
         eip_information[eip_index]
       end
 
       def which_instance_should_get_eip(moveable_eip)
         puts "\nHere are all of the instances in the current instance's layer:"
-        instances = @opsworks_adapter.instances_by_layer(moveable_eip[:layer_id])
-        instances = instances.select { |instance| instance.elastic_ip.nil? && instance.auto_scaling_type.nil? }
-        instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
-        instance_index = @cli.ask("What is your target instance?\n", Integer) { |q| q.in = 1..instances.length.to_i } - 1
+        instances = get_potential_target_instances(moveable_eip)
+        print_potential_target_instances(instances)
+        instance_index = ask_eip_question("What is your target instance?\n", instances)
         instances[instance_index].instance_id
       end
+
+      def ask_eip_question(prompt, choices)
+        @cli.ask(prompt, Integer) { |q| q.in = 1..choices.length.to_i } - 1
+      end
+      private :ask_eip_question
+
+      def print_current_eips(eip_information)
+        eip_information.each_with_index { |eip, index| puts "#{index.to_i + 1}) #{eip[:ip_address]} connected to #{eip[:instance_name]}" }
+      end
+      private :print_current_eips
+
+      def print_potential_target_instances(instances)
+        instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
+      end
+      private :print_potential_target_instances
+
+      def get_potential_target_instances(moveable_eip)
+        instances = @opsworks_adapter.instances_by_layer(moveable_eip[:layer_id])
+        instances.select { |instance| instance.elastic_ip.nil? && instance.auto_scaling_type.nil? }
+      end
+      private :get_potential_target_instances
     end
   end
 end

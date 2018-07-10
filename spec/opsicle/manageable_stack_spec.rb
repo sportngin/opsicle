@@ -18,11 +18,7 @@ describe Opsicle::ManageableStack do
     )
   end
 
-  let(:stack) do
-    double(:stack,
-      vpc_id: "id"
-    )
-  end
+  let(:stack) { double(:stack, vpc_id: "id") }
 
   let(:layer) do
     double(:layer,
@@ -38,11 +34,7 @@ describe Opsicle::ManageableStack do
     )
   end
 
-  let(:client) do
-    double(:client,
-      opsworks: aws_opsworks_client
-    )
-  end
+  let(:client) { double(:client, opsworks: aws_opsworks_client) }
 
   let(:aws_opsworks_client) do
     double(:aws_opsworks_client,
