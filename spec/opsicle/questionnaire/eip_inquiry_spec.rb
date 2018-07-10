@@ -1,13 +1,9 @@
 describe Opsicle::Questionnaire::EipInquiry do
-  let(:cli) do
-    double(:cli,
-      ask: 1
-    )
-  end
+  let(:cli) { double(:cli, ask: 1) }
 
   let(:online_instance_with_eip) do
     double(:instance,
-      elastic_ip: nil,
+      elastic_ip: true,
       auto_scaling_type: nil,
       status: "online",
       hostname: "example",
@@ -29,17 +25,13 @@ describe Opsicle::Questionnaire::EipInquiry do
     double(:instance,
       elastic_ip: nil,
       auto_scaling_type: nil,
-      status: "online",
+      status: "stopped",
       hostname: "example",
       instance_id: "instance-id"
     )
   end
 
-  let(:client) do
-    double(:client,
-      opsworks: aws_opsworks_client
-    )
-  end
+  let(:client) { double(:client, opsworks: aws_opsworks_client) }
 
   let(:aws_opsworks_client) do
     double(:aws_opsworks_client,
