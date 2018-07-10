@@ -30,8 +30,8 @@ module Opsicle
 
     def move_eip
       eip_information = @stack.eips
-      moveable_eip = eip_inquiry.which_eip_should_move(eip_information)
-      target_instance_id = eip_inquiry.which_instance_should_get_eip(moveable_eip)
+      moveable_eip = @eip_inquiry.which_eip_should_move(eip_information)
+      target_instance_id = @eip_inquiry.which_instance_should_get_eip(moveable_eip)
       @stack.transfer_eip(moveable_eip, target_instance_id)
     end
   end
