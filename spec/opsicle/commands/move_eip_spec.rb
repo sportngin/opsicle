@@ -1,4 +1,7 @@
 describe Opsicle::MoveEip do
+  let(:config) { double(:config, opsworks_config: {stack_id: "123"}) }
+  let(:client) { double(:client, config: config) }
+
   let(:moveable_eip) do
     double(:eip,
       eip: true,
@@ -25,14 +28,6 @@ describe Opsicle::MoveEip do
     )
   end
   
-  let(:client) do
-    double(:client,
-      config: @config,
-      opsworks: @opsworks,
-      ec2: @ec2
-    )
-  end
-  
   let(:eip_inquiry) do
     double(:eip_inquiry,
       which_eip_should_move: moveable_eip,
@@ -41,6 +36,8 @@ describe Opsicle::MoveEip do
   end
 
   before do
+    allow(Opsicle::Client).to receive(:new).with("staging").and_return(client)
+    allow(Opsicle::OpsworksAdapter).to receive(:new).and_return(true)
     allow(Opsicle::Questionnaire::EipInquiry).to receive(:new).and_return(eip_inquiry)
     allow(Opsicle::ManageableStack).to receive(:new).and_return(stack)
   end
