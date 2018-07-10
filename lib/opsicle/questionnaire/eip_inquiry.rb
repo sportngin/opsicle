@@ -4,8 +4,8 @@ module Opsicle
       attr_accessor :opsworks_adapter, :cli
 
       def initialize(options)
-        @opsworks_adapter = options[:opsworks_adapter]
-        @cli = options[:highline_client]
+        self.opsworks_adapter = options[:opsworks_adapter]
+        self.cli = options[:highline_client]
       end
 
       def which_eip_should_move(eip_information)
