@@ -5,7 +5,27 @@ describe Opsicle::Questionnaire::EipInquiry do
     )
   end
 
-  let(:instance) do
+  let(:online_instance_with_eip) do
+    double(:instance,
+      elastic_ip: nil,
+      auto_scaling_type: nil,
+      status: "online",
+      hostname: "example",
+      instance_id: "instance-id"
+    )
+  end
+
+  let(:online_instance_without_eip) do
+    double(:instance,
+      elastic_ip: nil,
+      auto_scaling_type: nil,
+      status: "online",
+      hostname: "example",
+      instance_id: "instance-id"
+    )
+  end
+
+  let(:stopped_instance) do
     double(:instance,
       elastic_ip: nil,
       auto_scaling_type: nil,
@@ -23,7 +43,7 @@ describe Opsicle::Questionnaire::EipInquiry do
 
   let(:aws_opsworks_client) do
     double(:aws_opsworks_client,
-      describe_instances: double(:instances, instances: [instance])
+      describe_instances: double(:instances, instances: [online_instance_with_eip, online_instance_without_eip, stopped_instance])
     )
   end
 
