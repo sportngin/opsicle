@@ -4,7 +4,7 @@ require "opsicle/opsworks_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
-require "opsicle/questionaire/eip_questions"
+require "opsicle/questionnaire/eip_questions"
 
 module Opsicle
   class MoveEip
@@ -16,7 +16,7 @@ module Opsicle
       @cli = HighLine.new
       @stack = ManageableStack.new(stack_id, @opsworks_adapter, @cli)
 
-      @eip_asker = Questionaire::EipQuestions.new(
+      @eip_asker = Questionnaire::EipQuestions.new(
         opsworks_adapter: @opsworks_adapter,
         highline_client: @cli
       )

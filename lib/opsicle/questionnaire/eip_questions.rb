@@ -1,5 +1,5 @@
 module Opsicle
-  module Questionaire
+  module Questionnaire
     class EipQuestions
       attr_accessor :opsworks_adapter, :cli
 
