@@ -23,6 +23,7 @@ module Opsicle
       eip_information = []
 
       @eips.each do |eip|
+        next unless eip.instance_id
         instance_id = eip.instance_id
         instance = @opsworks.describe_instances(instance_ids: [instance_id]).instances.first
         instance_name = instance.hostname
