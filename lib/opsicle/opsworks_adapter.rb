@@ -1,8 +1,8 @@
 class Opsicle::OpsworksAdapter
   attr_reader :client
 
-  def initialize(client)
-    @client = client.opsworks
+  def initialize(opsicle_client)
+    @client = opsicle_client.opsworks
   end
 
   def stack(stack_id)
