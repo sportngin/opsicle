@@ -40,7 +40,11 @@ module Opsicle
 
       def get_potential_target_instances(moveable_eip)
         instances = @opsworks_adapter.instances_by_layer(moveable_eip[:layer_id])
-        instances.select { |instance| instance.elastic_ip.nil? && instance.auto_scaling_type.nil? }
+        instances.select do |instance|
+          instance.elastic_ip.nil? &&
+          instance.status == "online" &&
+          instance.auto_scaling_type.nil?
+        end
       end
       private :get_potential_target_instances
     end
