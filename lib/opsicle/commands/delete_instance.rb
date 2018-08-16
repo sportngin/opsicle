@@ -6,6 +6,8 @@ require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
 
+require "pry"
+
 module Opsicle
   class DeleteInstance
 
@@ -60,6 +62,11 @@ module Opsicle
         instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
         instance_indices_string = @cli.ask("Which instances would you like to delete? (enter as a comma separated list)\n", String)
         instance_indices_list = instance_indices_string.split(/,\s*/)
+
+        if instance_indices_list.include?("0")
+          raise StandardError, "Any instances to delete must be indicated with numbers > 0."
+        end
+
         instance_indices_list.map! { |instance_index| instance_index.to_i - 1 }
         instance_indices_list.each do |index|
           return_array << instances[index]
