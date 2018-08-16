@@ -75,7 +75,6 @@ module Opsicle
       new_hostname = auto_generated_hostname
       create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
       opsworks.start_instance(instance_id: new_instance_id)
-      add_tags
       puts "\nNew instance is starting…"
     end
 
