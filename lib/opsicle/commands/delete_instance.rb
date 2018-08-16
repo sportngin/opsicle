@@ -6,8 +6,6 @@ require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
 
-require "pry"
-
 module Opsicle
   class DeleteInstance
 
