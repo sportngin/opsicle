@@ -5,7 +5,7 @@ require "opsicle/ec2_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
-
+require"pry"
 module Opsicle
   class StopInstance
 
@@ -51,7 +51,7 @@ module Opsicle
     end
 
     def select_instances(layer)
-      instances = stoppable_instances(layer)
+      instances = stoppable_instances(layer) 
       return_array = []
       if instances.empty?
         puts "There are no stoppable instances."
@@ -72,7 +72,7 @@ module Opsicle
     def check_for_valid_indices!(instance_indices_list, option_count)
       valid_indices = 1..option_count
 
-      if instance_indices_list.all?{ |i| valid_indices.include?(i.to_i) }
+      unless instance_indices_list.all?{ |i| valid_indices.include?(i.to_i) }
         raise StandardError, "At least one of the indices passed is invalid. Please try again."
       end
     end

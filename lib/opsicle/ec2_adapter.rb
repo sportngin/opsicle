@@ -1,8 +1,8 @@
 class Opsicle::Ec2Adapter
   attr_reader :client
 
-  def initialize(client)
-    @client = client.ec2
+  def initialize(opsicle_client)
+    @client = opsicle_client.ec2
   end
 
   def get_subnets

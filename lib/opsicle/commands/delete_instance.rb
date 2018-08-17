@@ -72,7 +72,7 @@ module Opsicle
     def check_for_valid_indices!(instance_indices_list, option_count)
       valid_indices = 1..option_count
 
-      if instance_indices_list.all?{ |i| valid_indices.include?(i.to_i) }
+      unless instance_indices_list.all?{ |i| valid_indices.include?(i.to_i) }
         raise StandardError, "At least one of the indices passed is invalid. Please try again."
       end
     end
