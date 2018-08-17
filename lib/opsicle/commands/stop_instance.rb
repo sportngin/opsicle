@@ -5,7 +5,7 @@ require "opsicle/ec2_adapter"
 require "opsicle/manageable_layer"
 require "opsicle/manageable_instance"
 require "opsicle/manageable_stack"
-require"pry"
+
 module Opsicle
   class StopInstance
 
@@ -51,7 +51,7 @@ module Opsicle
     end
 
     def select_instances(layer)
-      instances = stoppable_instances(layer) 
+      instances = stoppable_instances(layer)
       return_array = []
       if instances.empty?
         puts "There are no stoppable instances."
