@@ -33,12 +33,14 @@ module Opsicle
       end
     end
 
-    private def set_permission(arn, stack_id)
+    def set_permission(arn, stack_id)
       @client.api_call(:set_permission, { allow_ssh: true, allow_sudo: true, iam_user_arn: arn , stack_id: stack_id } )
     end
+    private :set_permission
 
-    private def profiles
+    def profiles
       @profiles ||= @client.api_call(:describe_user_profiles)[:user_profiles]
     end
+    private :profiles
   end
 end
