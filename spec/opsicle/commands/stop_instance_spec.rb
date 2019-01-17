@@ -27,9 +27,9 @@ describe Opsicle::StopInstance do
       describe_stacks: double(stack: [ opsworks_stack ]),
       describe_instances: double(instances: [ instance1 ])
     )
-  end 
+  end
 
-  let(:ec2_client) { double(:ec2_client) }  
+  let(:ec2_client) { double(:ec2_client) }
 
   let(:opsworks_adapter) do
     double(:opsworks_adapter,
@@ -92,10 +92,9 @@ describe Opsicle::StopInstance do
       end
 
       it "should not stop any instances" do
-        expect(opsworks_adapter).not_to receive(:stop_instance) 
+        expect(opsworks_adapter).not_to receive(:stop_instance)
         subject.execute
       end
     end
   end
 end
-

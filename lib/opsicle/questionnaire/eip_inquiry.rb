@@ -50,7 +50,7 @@ module Opsicle
       private :get_potential_target_instances
 
       def check_for_printable_items!(instances)
-        if instances.empty?
+        if instances.empty? # instances is the list of instances that an eip can be moved to
           raise StandardError, "You cannot move an EIP when there's only one instance running."
         end
       end
