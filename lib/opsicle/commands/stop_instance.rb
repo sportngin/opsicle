@@ -60,6 +60,7 @@ module Opsicle
         instances.each_with_index { |instance, index| puts "#{index.to_i + 1}) #{instance.status} - #{instance.hostname}" }
         instance_indices_string = @cli.ask("Which instances would you like to stop? (enter as a comma separated list)\n", String)
         instance_indices_list = instance_indices_string.split(/,\s*/)
+        check_for_valid_indices!(instance_indices_list, instances.count)
         instance_indices_list.map! { |instance_index| instance_index.to_i - 1 }
         instance_indices_list.each do |index|
           return_array << instances[index]
@@ -67,5 +68,14 @@ module Opsicle
       end
       return_array
     end
+
+    def check_for_valid_indices!(instance_indices_list, option_count)
+      valid_indices = 1..option_count
+
+      unless instance_indices_list.all?{ |i| valid_indices.include?(i.to_i) }
+        raise StandardError, "At least one of the indices passed is invalid. Please try again."
+      end
+    end
+    private :check_for_valid_indices!
   end
 end

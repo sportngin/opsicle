@@ -18,6 +18,7 @@ module Opsicle
       def which_instance_should_get_eip(moveable_eip)
         puts "\nHere are all of the instances in the current instance's layer:"
         instances = get_potential_target_instances(moveable_eip)
+        check_for_printable_items!(instances)
         print_potential_target_instances(instances)
         instance_index = ask_eip_question("What is your target instance?\n", instances)
         instances[instance_index].instance_id
@@ -40,9 +41,20 @@ module Opsicle
 
       def get_potential_target_instances(moveable_eip)
         instances = @opsworks_adapter.instances_by_layer(moveable_eip[:layer_id])
-        instances.select { |instance| instance.elastic_ip.nil? && instance.auto_scaling_type.nil? }
+        instances.select do |instance|
+          instance.elastic_ip.nil? &&
+          instance.auto_scaling_type.nil? &&
+          instance.status == "online"
+        end
       end
       private :get_potential_target_instances
+
+      def check_for_printable_items!(instances)
+        if instances.empty? # instances is the list of instances that an eip can be moved to
+          raise StandardError, "You cannot move an EIP when there's only one instance running."
+        end
+      end
+      private :check_for_printable_items!
     end
   end
 end

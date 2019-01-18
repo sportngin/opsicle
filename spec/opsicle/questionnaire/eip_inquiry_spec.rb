@@ -66,5 +66,55 @@ describe Opsicle::Questionnaire::EipInquiry do
     it "should return a single instance" do
       expect(instance_response).to eq("instance-id")
     end
+
+    context "when there are no target instances" do
+      let(:online_instance_with_eip) do
+        double(:instance,
+          elastic_ip: true,
+          auto_scaling_type: nil,
+          status: "stopped",
+          hostname: "example",
+          instance_id: "instance-id"
+        )
+      end
+
+      let(:online_instance_without_eip) do
+        double(:instance,
+          elastic_ip: nil,
+          auto_scaling_type: nil,
+          status: "stopped",
+          hostname: "example",
+          instance_id: "instance-id"
+        )
+      end
+
+      let(:stopped_instance) do
+        double(:instance,
+          elastic_ip: nil,
+          auto_scaling_type: nil,
+          status: "stopped",
+          hostname: "example",
+          instance_id: "instance-id"
+        )
+      end
+
+      it "should raise an error" do
+        expect{subject.which_instance_should_get_eip(eip_info)}.to raise_error(StandardError)
+      end
+    end
+  end
+
+  describe "#check_for_printable_items" do
+    context "when there are instances" do
+      it "should not raise an error" do
+        expect(subject.send(:check_for_printable_items!, [ 1, 2, 3 ])).to eq(nil)
+      end
+    end
+
+    context "when there are no instances" do
+      it "should raise an error" do
+        expect{subject.send(:check_for_printable_items!, [])}.to raise_error(StandardError)
+      end
+    end
   end
 end

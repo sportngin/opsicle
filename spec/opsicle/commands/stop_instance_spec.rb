@@ -3,7 +3,7 @@ require "opsicle"
 require 'gli'
 require "opsicle/user_profile"
 
-describe Opsicle::DeleteInstance do
+describe Opsicle::StopInstance do
   let(:config) { double(:config, opsworks_config: {stack_id: "1234"}) }
   let(:opsicle_client) { double(:client, config: config, opsworks: opsworks_client, ec2: ec2_client) }
   let(:opsworks_stack) { double(:stack, id: "1234", vpc_id: "21") }
@@ -14,8 +14,8 @@ describe Opsicle::DeleteInstance do
     double(:instance,
       name: "instance1",
       layer_ids: [ "456" ],
-      status: "stopped",
-      auto_scaling_type: nil,
+      status: "online",
+      elastic_ip: nil,
       instance_id: "123",
       hostname: "instance1"
     )
@@ -52,7 +52,7 @@ describe Opsicle::DeleteInstance do
     allow(Opsicle::Client).to receive(:new).with("staging").and_return(opsicle_client)
     allow(Opsicle::OpsworksAdapter).to receive(:new).and_return(opsworks_adapter)
     allow_any_instance_of(HighLine).to receive(:ask).with("Layer?\n", Integer).and_return(2)
-  end
+   end
 
   subject { described_class.new("staging") }
 
@@ -60,39 +60,39 @@ describe Opsicle::DeleteInstance do
   describe "#execute" do
     context "when everything works as expected" do
       before do
-        allow_any_instance_of(HighLine).to receive(:ask).with("Which instances would you like to delete? (enter as a comma separated list)\n", String).and_return("1")
+        allow_any_instance_of(HighLine).to receive(:ask).with("Which instances would you like to stop? (enter as a comma separated list)\n", String).and_return("1")
       end
 
-      it "should properly ask to delete instances" do
-        expect(opsworks_adapter).to receive(:delete_instance).with("123")
+      it "should properly ask to stop instances" do
+        expect(opsworks_adapter).to receive(:stop_instance).with("123")
         subject.execute
       end
     end
 
-    context "when an improper value is passed in as something to delete" do
+    context "when an improper value is passed in as something to stop" do
       before do
-        allow_any_instance_of(HighLine).to receive(:ask).with("Which instances would you like to delete? (enter as a comma separated list)\n", String).and_return("-1")
+        allow_any_instance_of(HighLine).to receive(:ask).with("Which instances would you like to stop? (enter as a comma separated list)\n", String).and_return("-1")
       end
 
-      it "should properly ask to delete instances" do
+      it "should properly ask to stop instances" do
         expect{subject.execute}.to raise_error(StandardError)
       end
     end
 
-    context "when there are no deletable instances" do
+    context "when there are no stoppable instances" do
       let(:instance1) do
         double(:instance,
           name: "instance1",
           layer_ids: [ "456" ],
-          status: "online",
-          auto_scaling_type: nil,
+          status: "stopped",
+          elastic_ip: nil,
           instance_id: "123",
           hostname: "instance1"
         )
       end
 
-      it "should not delete any instances" do
-        expect(opsworks_adapter).not_to receive(:delete_instance)
+      it "should not stop any instances" do
+        expect(opsworks_adapter).not_to receive(:stop_instance)
         subject.execute
       end
     end
