@@ -1,3 +1,4 @@
+#### v2.12.5
 #### v2.12.4
 #### v2.12.3
 * Clean up manageable_stack and use opsworks adapter
