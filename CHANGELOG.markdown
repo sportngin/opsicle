@@ -1,3 +1,8 @@
+#### v2.13.0
+* Permit command
+
+  > Carl Allen: Emma Sax, production-status-check[bot]: https://github.com/sportngin/opsicle/pull/149
+
 #### v2.12.5
 #### v2.12.4
 #### v2.12.3
