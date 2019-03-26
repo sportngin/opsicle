@@ -1,3 +1,8 @@
+#### v2.13.1
+* Fix bug in clone-instance when MFA is enforced
+
+  > Brian Bergstrom: production-status-check[bot]: https://github.com/sportngin/opsicle/pull/157
+
 #### v2.13.0
 * Permit command
 
