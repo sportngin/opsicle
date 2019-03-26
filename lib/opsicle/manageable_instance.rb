@@ -169,7 +169,7 @@ module Opsicle
       if self.layer.subnet_id
         subnet_id = self.layer.subnet_id
       else
-        current_subnet = Aws::EC2::Subnet.new(id: self.subnet_id)
+        current_subnet = Aws::EC2::Subnet.new(id: self.subnet_id, client: @ec2)
         subnet_name = find_subnet_name(current_subnet)
         puts "\nCurrent subnet ID is \"#{subnet_name}\" #{current_subnet.availability_zone} (#{self.subnet_id})"
 
