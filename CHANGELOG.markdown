@@ -1,4 +1,7 @@
 #### v2.14.0
+ * Add a dash of modernity
+
+  > Patrick Byrne: https://github.com/sportngin/opsicle/pull/158
 #### v2.13.1
 * Fix bug in clone-instance when MFA is enforced
 
