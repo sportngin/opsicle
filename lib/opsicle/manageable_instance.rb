@@ -75,7 +75,6 @@ module Opsicle
       new_hostname = auto_generated_hostname
       create_new_instance(new_hostname, instance_type, ami_id, agent_version, subnet_id)
       opsworks.start_instance(instance_id: new_instance_id)
-      add_tags
       puts "\nNew instance is starting…"
     end
 
@@ -170,7 +169,7 @@ module Opsicle
       if self.layer.subnet_id
         subnet_id = self.layer.subnet_id
       else
-        current_subnet = Aws::EC2::Subnet.new(id: self.subnet_id)
+        current_subnet = Aws::EC2::Subnet.new(id: self.subnet_id, client: @ec2)
         subnet_name = find_subnet_name(current_subnet)
         puts "\nCurrent subnet ID is \"#{subnet_name}\" #{current_subnet.availability_zone} (#{self.subnet_id})"
 
