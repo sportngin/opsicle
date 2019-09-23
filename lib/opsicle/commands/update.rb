@@ -32,7 +32,7 @@ module Opsicle
     end
 
     def print(before, after)
-      diff = HashDiff.diff(before, after)
+      diff = Hashdiff.diff(before, after)
       Output.say("Changes: #{diff.size}")
       Output.terminal.say(Terminal::Table.new headings: %w[Change Key Before After], rows: format_diff(diff)) if diff.size > 0
     end
