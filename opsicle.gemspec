@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "highline", "~> 1.6"
   spec.add_dependency "terminal-table", "~> 1.4"
   spec.add_dependency "minitar", "~> 0.6"
-  spec.add_dependency "hashdiff", "~> 0.2"
+  spec.add_dependency "hashdiff", "~> 1.0"
   spec.add_dependency "curses", "~> 1.0.2"
 
   spec.add_development_dependency "rake", "~> 10.1"
