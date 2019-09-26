@@ -20,7 +20,6 @@ module Opsicle
       :subnet_id,
       :architecture,
       :root_device_type,
-      :install_updates_on_boot,
       :ebs_optimized,
       :tenancy,
       :opsworks,
@@ -46,7 +45,6 @@ module Opsicle
       self.subnet_id = instance.subnet_id
       self.architecture = instance.architecture
       self.root_device_type = instance.root_device_type
-      self.install_updates_on_boot = instance.install_updates_on_boot
       self.ebs_optimized = instance.ebs_optimized
       self.tenancy = instance.tenancy
       self.opsworks = opsworks
@@ -240,7 +238,6 @@ module Opsicle
         virtualization_type: self.virtualization_type,
         architecture: self.architecture, # accepts x86_64, i386
         root_device_type: self.root_device_type, # accepts ebs, instance-store
-        install_updates_on_boot: self.install_updates_on_boot,
         #ebs_optimized: self.ebs_optimized,
         agent_version: agent_version,
         tenancy: self.tenancy,
