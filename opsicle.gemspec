@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "aws-sdk", ">= 2.0", "< 4.0"
   spec.add_dependency "gli", "~> 2.9"
-  spec.add_dependency "highline", "~> 1.6"
+  spec.add_dependency "highline", "~> 2.0"
   spec.add_dependency "terminal-table", "~> 1.4"
   spec.add_dependency "minitar", "~> 0.6"
   spec.add_dependency "hashdiff", "~> 1.0"
