@@ -1,3 +1,5 @@
+require 'aws-sdk-ec2'
+
 module Opsicle
   class ManageableInstance
     attr_accessor(

@@ -18,7 +18,12 @@ Gem::Specification.new do |spec|
   spec.test_files    = Dir['spec/**/*']
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "aws-sdk", ">= 2.0", "< 4.0"
+  spec.add_dependency "aws-sdk-core", ">= 3.0", "<4.0"
+  spec.add_dependency "aws-sdk-ec2", ">= 1.0", "<2.0"
+  spec.add_dependency "aws-sdk-iam", ">= 1.0", "< 2.0"
+  spec.add_dependency "aws-sdk-opsworks", ">= 1.0", "< 2.0"
+  spec.add_dependency "aws-sdk-s3", ">= 1.0", "< 2.0"
+  spec.add_dependency "aws-sdk-sts", ">= 1.0", "< 2.0"
   spec.add_dependency "gli", "~> 2.9"
   spec.add_dependency "highline", "~> 2.0"
   spec.add_dependency "terminal-table", "~> 1.4"
