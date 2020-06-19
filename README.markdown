@@ -110,3 +110,22 @@ For example:
 opsicle --debug update staging stack -j '{"use_opsworks_security_groups":false, "custom_json":"{\"foo\":5}"}'
 opsicle --debug update staging app -y app.yml
 ```
+
+### Using a Docker Container
+Since local dev environments change so frequently, this is an option to run opsicle commands inside of an isolated Docker container. This 
+will help mitigate issues on your local environment as it should be the same environment in the docker container every time. There is minimal
+setup to get this method to work.
+
+Create the Docker image:
+```
+docker build .
+```
+
+Create an alias in your .bashrc file:
+```
+alias opsicle="docker run -it -v $(pwd)/.opsicle:/.opsicle -v ~/.aws/credentials:/root/.aws/credentials -v ~/.ssh/id_rsa:/root/.ssh/id_rsa <HASH_FROM_DOCKER_BUILD>'
+source ~/.bashrc
+```
+
+This will mount the .opsicle config file for the directory you are currently in. It will also mount your AWS credentials file and your SSH private key when starting the container. 
+You can then run opsicle commands as if you were using the executable, but it will be running in a clean, isolated container.
