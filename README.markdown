@@ -118,12 +118,12 @@ setup to get this method to work.
 
 Create the Docker image:
 ```
-docker build .
+docker build . -t dev/opsicle:latest
 ```
 
 Create an alias in your .bashrc file:
 ```
-alias opsicle="docker run -it -v $(pwd)/.opsicle:/.opsicle -v ~/.aws/credentials:/root/.aws/credentials -v ~/.ssh/id_rsa:/root/.ssh/id_rsa <HASH_FROM_DOCKER_BUILD>'
+alias opsicle="docker run -it -v $(pwd)/.opsicle:/.opsicle -v ~/.aws/credentials:/root/.aws/credentials -v ~/.ssh/id_rsa:/root/.ssh/id_rsa dev/opsicle:latest'
 source ~/.bashrc
 ```
 
