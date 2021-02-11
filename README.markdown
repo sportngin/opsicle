@@ -126,5 +126,5 @@ Create an alias in your .bashrc file:
 alias opsicle='docker run -it -v $(pwd)/.opsicle:/.opsicle -v ~/.aws/credentials:/root/.aws/credentials -v ~/.ssh:/root/.ssh dev/opsicle:latest'
 ```
 
-This will mount the .opsicle config file for the directory you are currently in. It will also mount your AWS credentials file and your SSH private key when starting the container.
+This will mount the .opsicle config file for the directory you are currently in. It will also mount your AWS credentials file and your .ssh directory when starting the container.
 You can then run opsicle commands as if you were using the executable, but it will be running in a clean, isolated container.
