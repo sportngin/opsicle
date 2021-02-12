@@ -49,7 +49,7 @@ module Opsicle
     end
 
     def layer_names(instance)
-      instance[:layer_ids].map{ |layer_id| @stack.layer_name(layer_id) }.join(" | ")
+      instance[:layer_ids].map{ |layer_id| @stack.layer_name(layer_id) }.join(", ")
     end
 
   end
