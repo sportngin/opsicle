@@ -1,4 +1,5 @@
 require 'pathname'
+require 'aws-sdk-s3'
 
 module Opsicle
   class S3Bucket

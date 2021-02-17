@@ -1,4 +1,7 @@
 require 'opsicle/config'
+require 'aws-sdk-ec2'
+require 'aws-sdk-opsworks'
+require 'aws-sdk-s3'
 
 module Opsicle
   class Client
